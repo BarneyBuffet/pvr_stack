@@ -2,8 +2,9 @@
 version: '3'
 
 services:
-    ## https://haugene.github.io/docker-transmission-openvpn/
- transmission-openvpn:
+  ## https://haugene.github.io/docker-transmission-openvpn/
+  transmission-openvpn:
+    ## https://github.com/haugene/docker-transmission-openvpn/releases
     image: haugene/transmission-openvpn:${TRANSMISSION_VERSION:-4.0}
     container_name: pvr_transmission
     volumes:
@@ -49,13 +50,48 @@ services:
         options:
             max-size: 10m
     ports:
-        - 9091:9091
+        - 9091:9091 ## Transmission WebGUI
+        - 8265:8265 ## Tdarr WebGui
         # - 9117:9117
         # - 7878:7878
         # - 8989:8989
         # - 8686:8686
         # - 5299:5299
     restart: unless-stopped
+
+  tdarr:
+    ## https://github.com/users/haveagitgat/packages/container/package/tdarr 
+    image: ghcr.io/haveagitgat/tdarr:${TDARR_VERSION:-2.00.18}
+    container_name: pvr_tdarr
+    network_mode: "service:transmission-openvpn"
+    # ports: ## Not needed because we are going through service:transmission-openvpn 
+      # - 8265:8265 # webUI port
+      # - 8266:8266 # server port
+      # - 8267:8267 # Internal node port
+      # - 8268:8268 # Example extra node port
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK_SET=002
+      - serverIP=0.0.0.0
+      - serverPort=8266
+      - webUIPort=8265
+      - internalNode=true
+      ## Not using distributed notes, so not needed
+      # - nodeID=MyInternalNode
+      # - nodeIP=0.0.0.0
+      # - nodePort=8267
+    volumes:
+      - ${PVR_PATH}/tdarr/server:/app/server
+      - ${PVR_PATH}/tdarr/configs:/app/configs
+      - ${PVR_PATH}/tdarr/logs:/app/logs
+      - ${PVR_PATH}/tdarr/media:/media
+      - ${PVR_PATH}/tdarr/transcode_cache:/temp
+      - ${MOVIES_PATH}:/home/Tdarr/Media/Movies
+      - ${TV_PATH}:/home/Tdarr/Media/TVShows
+    restart: unless-stopped
+
  
 #  jackett:
 #     image: linuxserver/jackett
