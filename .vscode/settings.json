@@ -3,6 +3,7 @@
         "Dockerfiles",
         "PROWLARR",
         "RADARR",
+        "SONARR",
         "TDARR"
     ]
 }
