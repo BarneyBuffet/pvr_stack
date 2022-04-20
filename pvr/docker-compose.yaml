@@ -51,10 +51,10 @@ services:
             max-size: 10m
     ports:
         - 9091:9091 ## Transmission WebGUI
-        - 8265:8265 ## Tdarr WebGui
-        - 9696:9696 ## Prowlarr WebGui
+        - 8265:8265 ## Tdarr WebGUI
+        - 9696:9696 ## Prowlarr WebGUI
+        - 7878:7878 ## Radarr WebGUI
         # - 9117:9117
-        # - 7878:7878
         # - 8989:8989
         # - 8686:8686
         # - 5299:5299
@@ -94,6 +94,7 @@ services:
     restart: unless-stopped
 
   prowlarr:
+    ## https://github.com/linuxserver/docker-prowlarr/releases
     image: lscr.io/linuxserver/prowlarr:${PROWLARR_VERSION:-develop}
     network_mode: "service:transmission-openvpn"
     container_name: pvr_prowlarr
@@ -106,19 +107,21 @@ services:
       - ${PVR_PATH}/prowlarr:/config
     restart: unless-stopped
  
-#  radarr:
-#     image: linuxserver/radarr
-#     network_mode: "service:transmission-openvpn"
-#     container_name: radarr
-#     environment:
-#         - PUID=1000
-#         - PGID=100
-#         - TZ=America/New_York
-#         - UMASK_SET=022 #optional
-#     volumes:
-#         - /srv/dev-disk-by-label-data/appdata/radarr:/config
-#         - /srv/dev-disk-by-label-data/media:/media
-#     restart: unless-stopped
+  radarr:
+    ## https://github.com/linuxserver/docker-radarr/releases
+    image: lscr.io/linuxserver/radarr:${RADARR_VERSION:-4.1.0.6175-ls136}
+    network_mode: "service:transmission-openvpn"
+    container_name: pvr_radarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK_SET=022
+    volumes:
+        - ${PVR_PATH}/radarr:/config
+        - ${MOVIES_PATH}:/movies
+        - ${DOWNLOADS_PATH}:/downloads
+    restart: unless-stopped
  
 #  sonarr:
 #     image: linuxserver/sonarr
