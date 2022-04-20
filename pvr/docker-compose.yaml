@@ -52,6 +52,7 @@ services:
     ports:
         - 9091:9091 ## Transmission WebGUI
         - 8265:8265 ## Tdarr WebGui
+        - 9696:9696 ## Prowlarr WebGui
         # - 9117:9117
         # - 7878:7878
         # - 8989:8989
@@ -73,7 +74,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - UMASK_SET=002
+      - UMASK_SET=022
       - serverIP=0.0.0.0
       - serverPort=8266
       - webUIPort=8265
@@ -92,21 +93,18 @@ services:
       - ${TV_PATH}:/home/Tdarr/Media/TVShows
     restart: unless-stopped
 
- 
-#  jackett:
-#     image: linuxserver/jackett
-#     container_name: jackett
-#     network_mode: "service:transmission-openvpn"
-#     environment:
-#         - PUID=1000
-#         - PGID=100
-#         - TZ=America/New_York
-#         - AUTO_UPDATE=true #optional
-#         - RUN_OPTS=#optional
-#     volumes:
-#         - /srv/dev-disk-by-label-data/appdata/jackett:/config
-#         #Jackett only needs config
-#     restart: unless-stopped
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:${PROWLARR_VERSION:-develop}
+    network_mode: "service:transmission-openvpn"
+    container_name: pvr_prowlarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK_SET=022
+    volumes:
+      - ${PVR_PATH}/prowlarr:/config
+    restart: unless-stopped
  
 #  radarr:
 #     image: linuxserver/radarr
