@@ -8,56 +8,56 @@ services:
     image: haugene/transmission-openvpn:${TRANSMISSION_VERSION:-4.0}
     container_name: pvr_transmission
     volumes:
-        - ${DOWNLOADS_PATH}:/data/downloads
-        - ${PVR_PATH}/transmission:/data/transmission-home
-        - /etc/localtime:/etc/localtime:ro
+      - ${DOWNLOADS_PATH}:/data/downloads
+      - ${PVR_PATH}/transmission:/data/transmission-home
+      - /etc/localtime:/etc/localtime:ro
     environment:
-        - PUID=${PUID}
-        - PGID=${PGID}
-        - TZ=${TZ}
-        - CREATE_TUN_DEVICE=true
-        - OPENVPN_CONFIG=
-        - OPENVPN_PROVIDER=${OPENVPN_PROVIDER}
-        - OPENVPN_CONFIG=${OPENVPN_CONFIG}
-        - OPENVPN_USERNAME=${OPENVPN_USERNAME}
-        - OPENVPN_PASSWORD=${OPENVPN_PASSWORD}
-        - OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60 --dhcp-option DNS 9.9.9.9
-        - WEBPROXY_ENABLED=false
-        - LOCAL_NETWORK=${TRANSMISSION_LOCAL_NETWORK}
-        - TRANSMISSION_SCRAPE_PAUSED_TORRENTS_ENABLED=false
-        - TRANSMISSION_HOME=/data/transmission-home
-        - TRANSMISSION_DOWNLOAD_DIR=/data/downloads
-        - TRANSMISSION_INCOMPLETE_DIR=/data/downloads/#incomplete
-        - TRANSMISSION_WATCH_DIR=/data/downloads/#watch
-        - TRANSMISSION_RPC_AUTHENTICATION_REQUIRED=true
-        - TRANSMISSION_RPC_USERNAME=${TRANSMISSION_RPC_USERNAME}
-        - TRANSMISSION_RPC_PASSWORD=${TRANSMISSION_RPC_PASSWORD}
-        - TRANSMISSION_DOWNLOAD_QUEUE_SIZE=4
-        - TRANSMISSION_WEB_UI=transmission-web-control
-        - TRANSMISSION_ALT_SPEED_DOWN=1000
-        - TRANSMISSION_ALT_SPEED_ENABLED=true
-        - TRANSMISSION_ALT_SPEED_TIME_BEGIN=300
-        - TRANSMISSION_ALT_SPEED_TIME_DAY=127
-        - TRANSMISSION_ALT_SPEED_TIME_ENABLED=true
-        - TRANSMISSION_ALT_SPEED_TIME_END=1380
-        - TRANSMISSION_ALT_SPEED_UP=2
-        - TRANSMISSION_PEER_PORT=47444
-        - DNS=9.9.9.9,149.112.112.112
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - CREATE_TUN_DEVICE=true
+      - OPENVPN_CONFIG=
+      - OPENVPN_PROVIDER=${OPENVPN_PROVIDER}
+      - OPENVPN_CONFIG=${OPENVPN_CONFIG}
+      - OPENVPN_USERNAME=${OPENVPN_USERNAME}
+      - OPENVPN_PASSWORD=${OPENVPN_PASSWORD}
+      - OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60 --dhcp-option DNS 9.9.9.9
+      - WEBPROXY_ENABLED=false
+      - LOCAL_NETWORK=${TRANSMISSION_LOCAL_NETWORK}
+      - TRANSMISSION_SCRAPE_PAUSED_TORRENTS_ENABLED=false
+      - TRANSMISSION_HOME=/data/transmission-home
+      - TRANSMISSION_DOWNLOAD_DIR=/data/downloads
+      - TRANSMISSION_INCOMPLETE_DIR=/data/downloads/#incomplete
+      - TRANSMISSION_WATCH_DIR=/data/downloads/#watch
+      - TRANSMISSION_RPC_AUTHENTICATION_REQUIRED=true
+      - TRANSMISSION_RPC_USERNAME=${TRANSMISSION_RPC_USERNAME}
+      - TRANSMISSION_RPC_PASSWORD=${TRANSMISSION_RPC_PASSWORD}
+      - TRANSMISSION_DOWNLOAD_QUEUE_SIZE=4
+      - TRANSMISSION_WEB_UI=transmission-web-control
+      - TRANSMISSION_ALT_SPEED_DOWN=1000
+      - TRANSMISSION_ALT_SPEED_ENABLED=true
+      - TRANSMISSION_ALT_SPEED_TIME_BEGIN=300
+      - TRANSMISSION_ALT_SPEED_TIME_DAY=127
+      - TRANSMISSION_ALT_SPEED_TIME_ENABLED=true
+      - TRANSMISSION_ALT_SPEED_TIME_END=1380
+      - TRANSMISSION_ALT_SPEED_UP=2
+      - TRANSMISSION_PEER_PORT=47444
+      - DNS=9.9.9.9,149.112.112.112
     cap_add:
-        - NET_ADMIN
+      - NET_ADMIN
     logging:
-        driver: json-file
-        options:
-            max-size: 10m
+      driver: json-file
+      options:
+        max-size: 10m
     ports:
-        - 9091:9091 ## Transmission WebGUI
-        - 8265:8265 ## Tdarr WebGUI
-        - 9696:9696 ## Prowlarr WebGUI
-        - 7878:7878 ## Radarr WebGUI
-        # - 9117:9117
-        # - 8989:8989
-        # - 8686:8686
-        # - 5299:5299
+      - 9091:9091 ## Transmission WebGUI
+      - 8265:8265 ## Tdarr WebGUI
+      - 9696:9696 ## Prowlarr WebGUI
+      - 7878:7878 ## Radarr WebGUI
+      - 8989:8989 ## Sonarr WebGUI
+      - 8686:8686 ## Lidarr WebGUI
+      # - 9117:9117
+      # - 5299:5299
     restart: unless-stopped
 
   tdarr:
@@ -118,9 +118,9 @@ services:
       - TZ=${TZ}
       - UMASK_SET=022
     volumes:
-        - ${PVR_PATH}/radarr:/config
-        - ${MOVIES_PATH}:/movies
-        - ${DOWNLOADS_PATH}:/downloads
+      - ${PVR_PATH}/radarr:/config
+      - ${MOVIES_PATH}:/movies
+      - ${DOWNLOADS_PATH}:/downloads
     restart: unless-stopped
  
   sonarr:
@@ -134,24 +134,25 @@ services:
       - TZ=${TZ}
       - UMASK_SET=022
     volumes:
-        - ${PVR_PATH}/sonarr:/config
-        - ${TV_PATH}:/tv
-        - ${DOWNLOADS_PATH}:/downloads
+      - ${PVR_PATH}/sonarr:/config
+      - ${TV_PATH}:/tv
+      - ${DOWNLOADS_PATH}:/downloads
     restart: unless-stopped
  
-#  lidarr:
-#     image: linuxserver/lidarr
-#     network_mode: "service:transmission-openvpn"
-#     container_name: lidarr
-#     environment:
-#         - PUID=1000
-#         - PGID=100
-#         - TZ=America/New_York
-#         - UMASK_SET=022 #optional
-#     volumes:
-#         - /srv/dev-disk-by-label-data/appdata/lidarr:/config
-#         - /srv/dev-disk-by-label-data/media/:/media
-#     restart: unless-stopped
+  lidarr:
+    image: lscr.io/linuxserver/lidarr:${LIDARR_VERSION:-0.8.1.2135-ls79}
+    network_mode: "service:transmission-openvpn"
+    container_name: pvr_lidarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK_SET=022
+    volumes:
+      - ${PVR_PATH}/lidarr:/config
+      - ${MUSIC_PATH}:/music
+      - ${DOWNLOADS_PATH}:/downloads
+    restart: unless-stopped
  
 #  lazylibrarian:
 #     image: linuxserver/lazylibrarian
