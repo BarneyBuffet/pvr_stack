@@ -16,7 +16,6 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
       - CREATE_TUN_DEVICE=true
-      - OPENVPN_CONFIG=
       - OPENVPN_PROVIDER=${OPENVPN_PROVIDER}
       - OPENVPN_CONFIG=${OPENVPN_CONFIG}
       - OPENVPN_USERNAME=${OPENVPN_USERNAME}
@@ -57,6 +56,8 @@ services:
       - 8989:8989 ## Sonarr WebGUI
       - 8686:8686 ## Lidarr WebGUI
       - 8787:8787 ## Readarr WebGUI
+      - 8081:8081 ## Calibre WebGUI
+      - 8082:8080 ## Calibre Desktop GUI
     restart: unless-stopped
 
   tdarr:
@@ -73,7 +74,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - UMASK_SET=022
+      - UMASK_SET=${UMASK}
       - serverIP=0.0.0.0
       - serverPort=8266
       - webUIPort=8265
@@ -90,6 +91,7 @@ services:
       - ${PVR_PATH}/tdarr/transcode_cache:/temp
       - ${MOVIES_PATH}:/home/Tdarr/Media/Movies
       - ${TV_PATH}:/home/Tdarr/Media/TVShows
+      - ${BJJ_PATH}:/home/Tdarr/Media/BJJ
     restart: unless-stopped
 
   prowlarr:
@@ -101,7 +103,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - UMASK_SET=022
+      - UMASK=${UMASK}
     volumes:
       - ${PVR_PATH}/prowlarr:/config
     restart: unless-stopped
@@ -115,7 +117,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - UMASK_SET=022
+      - UMASK=${UMASK}
     volumes:
       - ${PVR_PATH}/radarr:/config
       - ${MOVIES_PATH}:/movies
@@ -131,7 +133,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - UMASK_SET=022
+      - UMASK=${UMASK}
     volumes:
       - ${PVR_PATH}/sonarr:/config
       - ${TV_PATH}:/tv
@@ -147,7 +149,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - UMASK_SET=022
+      - UMASK=${UMASK}
     volumes:
       - ${PVR_PATH}/lidarr:/config
       - ${MUSIC_PATH}:/music
@@ -163,12 +165,30 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - UMASK_SET=022
+      - UMASK=${UMASK}
     volumes:
       - ${PVR_PATH}/readarr:/config
       - ${BOOKS_PATH}:/books
       - ${DOWNLOADS_PATH}:/downloads
     restart: unless-stopped
+
+  # calibre:
+  #   ## https://github.com/linuxserver/docker-calibre/releases
+  #   image: lscr.io/linuxserver/calibre:${CALIBRE_VERSION:-v5.40.0-ls157}
+  #   network_mode: "service:transmission-openvpn"
+  #   container_name: pvr_calibre
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=${TZ}
+  #     - UMASK=${UMASK}
+  #     # - PASSWORD=${CALIBRE_PASSWORD}
+  #     # - CLI_ARGS= #optional
+  #   volumes:
+  #     - ${PVR_PATH}/calibre:/config
+  #     - ${BOOKS_PATH}:/books
+  #     - ${DOWNLOADS_PATH}:/downloads
+  #   restart: unless-stopped
 
 #  lazylibrarian:
 #     image: linuxserver/lazylibrarian
@@ -183,3 +203,52 @@ services:
 #         - /srv/dev-disk-by-label-data/appdata/lazylibrarian:/config
 #         - /srv/dev-disk-by-label-data/media/:/media
 #     restart: unless-stopped
+
+  # calibre:
+  #     image: linuxserver/calibre
+  #     network_mode: "service:transmission-openvpn"
+  #     container_name: calibre
+  #     env_file:
+  #         - stack.env
+  #     volumes:
+  #         - /media/${USER}/Data/appdata/calibre:/config
+  #         - /media/${USER}/Data/media/books:/books
+  #         - /media/${USER}/Data/media/books_not_in_library:/books_add_me
+  #     restart: unless-stopped
+      
+  # calibre-web:
+  #     image: linuxserver/calibre-web
+  #     network_mode: "service:transmission-openvpn"
+  #     container_name: calibre-web
+  #     env_file:
+  #         - stack.env
+  #     volumes:
+  #       - /media/${USER}/Data/appdata/calibre-web:/config
+  #       - /media/${USER}/Data/media/books:/books
+  #     restart: unless-stopped    
+
+  # plex:
+  #     image: linuxserver/plex
+  #     network_mode: "service:transmission-openvpn"
+  #     container_name: plex
+  #     volumes:
+  #         - /media/${USER}/Data/appdata/plex:/config
+  #         - /media/${USER}/Data/media/tv:/tv
+  #         - /media/${USER}/Data/media/movies:/movies
+  #         - /media/${USER}/Data/media/music:/music
+  #     env_file:
+  #         - stack.env
+  #     restart: unless-stopped    
+
+  # soulseek:
+  #     image: realies/soulseek
+  #     network_mode: "service:transmission-openvpn"
+  #     container_name: soulseek
+  #     volumes:
+  #       - /media/${USER}/Data/appdata/soulseek:/data/.SoulseekQt
+  #       - /media/${USER}/Data/downloads/soulseekqt:/data/Soulseek Downloads
+  #       - /home/${USER}/.local/log/soulseek:/data/Soulseek Chat Logs
+  #       - /media/${USER}/Data/media/music/:/data/public/music
+  #     env_file:
+  #       - stack.env
+  #     restart: unless-stopped
