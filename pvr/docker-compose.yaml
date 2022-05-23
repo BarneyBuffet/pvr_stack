@@ -110,7 +110,7 @@ services:
  
   radarr:
     ## https://github.com/linuxserver/docker-radarr/releases
-    image: lscr.io/linuxserver/radarr:${RADARR_VERSION:-4.1.0.6175-ls136}
+    image: lscr.io/linuxserver/radarr:${RADARR_VERSION:-4.1.0.6175-ls139}
     network_mode: "service:transmission-openvpn"
     container_name: pvr_radarr
     environment:
@@ -126,7 +126,7 @@ services:
  
   sonarr:
     ## https://github.com/linuxserver/docker-sonarr/releases 
-    image: lscr.io/linuxserver/sonarr:${SONARR_VERSION:-3.0.7.1477-ls142}
+    image: lscr.io/linuxserver/sonarr:${SONARR_VERSION:-3.0.8.1507-ls147 }
     network_mode: "service:transmission-openvpn"
     container_name: pvr_sonarr
     environment:
@@ -142,7 +142,7 @@ services:
  
   lidarr:
     ## https://github.com/linuxserver/docker-lidarr/releases
-    image: lscr.io/linuxserver/lidarr:${LIDARR_VERSION:-0.8.1.2135-ls79}
+    image: lscr.io/linuxserver/lidarr:${LIDARR_VERSION:-0.8.1.2135-ls84}
     network_mode: "service:transmission-openvpn"
     container_name: pvr_lidarr
     environment:
