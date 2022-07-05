@@ -202,23 +202,23 @@ services:
   #     start_period: 60s
   #     timeout: 10s
 
-  calibre:
-    ## https://github.com/linuxserver/docker-calibre/releases
-    image: lscr.io/linuxserver/calibre:${CALIBRE_VERSION:-v5.40.0-ls157}
-    network_mode: "service:transmission-openvpn"
-    container_name: pvr_calibre
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - UMASK=${UMASK}
-      # - PASSWORD=${CALIBRE_PASSWORD}
-      # - CLI_ARGS= #optional
-    volumes:
-      - ${PVR_PATH}/calibre:/config
-      - ${BOOKS_PATH}:/books
-      - ${DOWNLOADS_PATH}:/downloads
-    restart: unless-stopped
+  # calibre:
+  #   ## https://github.com/linuxserver/docker-calibre/releases
+  #   image: lscr.io/linuxserver/calibre:${CALIBRE_VERSION:-v5.40.0-ls157}
+  #   network_mode: "service:transmission-openvpn"
+  #   container_name: pvr_calibre
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=${TZ}
+  #     - UMASK=${UMASK}
+  #     # - PASSWORD=${CALIBRE_PASSWORD}
+  #     # - CLI_ARGS= #optional
+  #   volumes:
+  #     - ${PVR_PATH}/calibre:/config
+  #     - ${BOOKS_PATH}:/books
+  #     - ${DOWNLOADS_PATH}:/downloads
+  #   restart: unless-stopped
 
 #  lazylibrarian:
 #     image: linuxserver/lazylibrarian
