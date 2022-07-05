@@ -62,7 +62,7 @@ services:
 
   tdarr:
     ## https://github.com/users/haveagitgat/packages/container/package/tdarr 
-    image: ghcr.io/haveagitgat/tdarr:${TDARR_VERSION:-2.00.18}
+    image: ghcr.io/haveagitgat/tdarr:${TDARR_VERSION:-2.00.18.2}
     container_name: pvr_tdarr
     network_mode: "service:transmission-openvpn"
     # ports: ## Not needed because we are going through service:transmission-openvpn 
