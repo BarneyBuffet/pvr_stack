@@ -180,45 +180,45 @@ services:
       start_period: 60s
       timeout: 10s
  
-  readarr:
-    ## https://github.com/linuxserver/docker-readarr/releases
-    image: lscr.io/linuxserver/readarr:${READARR_VERSION:-develop}
-    network_mode: "service:transmission-openvpn"
-    container_name: pvr_readarr
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - UMASK=${UMASK}
-    volumes:
-      - ${PVR_PATH}/readarr:/config
-      - ${BOOKS_PATH}:/books
-      - ${DOWNLOADS_PATH}:/downloads
-    restart: unless-stopped
-    healthcheck:
-      test: curl --fail http://localhost:8787 || exit 1
-      interval: 60s
-      retries: 5
-      start_period: 60s
-      timeout: 10s
-
-  # calibre:
-  #   ## https://github.com/linuxserver/docker-calibre/releases
-  #   image: lscr.io/linuxserver/calibre:${CALIBRE_VERSION:-v5.40.0-ls157}
+  # readarr:
+  #   ## https://github.com/linuxserver/docker-readarr/releases
+  #   image: lscr.io/linuxserver/readarr:${READARR_VERSION:-develop}
   #   network_mode: "service:transmission-openvpn"
-  #   container_name: pvr_calibre
+  #   container_name: pvr_readarr
   #   environment:
   #     - PUID=${PUID}
   #     - PGID=${PGID}
   #     - TZ=${TZ}
   #     - UMASK=${UMASK}
-  #     # - PASSWORD=${CALIBRE_PASSWORD}
-  #     # - CLI_ARGS= #optional
   #   volumes:
-  #     - ${PVR_PATH}/calibre:/config
+  #     - ${PVR_PATH}/readarr:/config
   #     - ${BOOKS_PATH}:/books
   #     - ${DOWNLOADS_PATH}:/downloads
   #   restart: unless-stopped
+  #   healthcheck:
+  #     test: curl --fail http://localhost:8787 || exit 1
+  #     interval: 60s
+  #     retries: 5
+  #     start_period: 60s
+  #     timeout: 10s
+
+  calibre:
+    ## https://github.com/linuxserver/docker-calibre/releases
+    image: lscr.io/linuxserver/calibre:${CALIBRE_VERSION:-v5.40.0-ls157}
+    network_mode: "service:transmission-openvpn"
+    container_name: pvr_calibre
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK=${UMASK}
+      # - PASSWORD=${CALIBRE_PASSWORD}
+      # - CLI_ARGS= #optional
+    volumes:
+      - ${PVR_PATH}/calibre:/config
+      - ${BOOKS_PATH}:/books
+      - ${DOWNLOADS_PATH}:/downloads
+    restart: unless-stopped
 
 #  lazylibrarian:
 #     image: linuxserver/lazylibrarian
