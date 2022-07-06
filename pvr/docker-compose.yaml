@@ -8,8 +8,8 @@ services:
     image: haugene/transmission-openvpn:${TRANSMISSION_VERSION:-4.0}
     container_name: pvr_transmission
     volumes:
-      - ${DOWNLOADS_PATH}:/data/downloads
-      - ${PVR_PATH}/transmission:/data/transmission-home
+      - ${DOWNLOADS_PATH}:/data/downloads:z
+      - ${PVR_PATH}/transmission:/data/transmission-home:Z
       - /etc/localtime:/etc/localtime:ro
     environment:
       - PUID=${PUID}
@@ -56,8 +56,9 @@ services:
       - 8989:8989 ## Sonarr WebGUI
       - 8686:8686 ## Lidarr WebGUI
       - 8787:8787 ## Readarr WebGUI
-      - 8081:8081 ## Calibre WebGUI
-      - 8082:8080 ## Calibre Desktop GUI
+      - 8080:8080 ## calibre
+      - 8081:8081 ## calibre-web
+      - 8083:8083 ## calibre-web
     restart: unless-stopped
 
   tdarr:
@@ -65,6 +66,8 @@ services:
     image: ghcr.io/haveagitgat/tdarr:${TDARR_VERSION:-2.00.18.2}
     container_name: pvr_tdarr
     network_mode: "service:transmission-openvpn"
+    depends_on:
+      - pvr_transmission # for vpn internet access
     # ports: ## Not needed because we are going through service:transmission-openvpn 
       # - 8265:8265 # webUI port
       # - 8266:8266 # server port
@@ -84,20 +87,22 @@ services:
       # - nodeIP=0.0.0.0
       # - nodePort=8267
     volumes:
-      - ${PVR_PATH}/tdarr/server:/app/server
-      - ${PVR_PATH}/tdarr/configs:/app/configs
-      - ${PVR_PATH}/tdarr/logs:/app/logs
-      - ${PVR_PATH}/tdarr/media:/media
-      - ${PVR_PATH}/tdarr/transcode_cache:/temp
-      - ${MOVIES_PATH}:/home/Tdarr/Media/Movies
-      - ${TV_PATH}:/home/Tdarr/Media/TVShows
-      - ${BJJ_PATH}:/home/Tdarr/Media/BJJ
+      - ${PVR_PATH}/tdarr/server:/app/server:Z
+      - ${PVR_PATH}/tdarr/configs:/app/configs:Z
+      - ${PVR_PATH}/tdarr/logs:/app/logs:Z
+      - ${PVR_PATH}/tdarr/media:/media:Z
+      - ${PVR_PATH}/tdarr/transcode_cache:/temp:Z
+      - ${MOVIES_PATH}:/home/Tdarr/Media/Movies:z
+      - ${TV_PATH}:/home/Tdarr/Media/TVShows:z
+      - ${BJJ_PATH}:/home/Tdarr/Media/BJJ:z
     restart: unless-stopped
 
   prowlarr:
     ## https://github.com/linuxserver/docker-prowlarr/releases
     image: lscr.io/linuxserver/prowlarr:${PROWLARR_VERSION:-develop}
     network_mode: "service:transmission-openvpn"
+    depends_on:
+      - pvr_transmission # for vpn internet access
     container_name: pvr_prowlarr
     environment:
       - PUID=${PUID}
@@ -105,7 +110,7 @@ services:
       - TZ=${TZ}
       - UMASK=${UMASK}
     volumes:
-      - ${PVR_PATH}/prowlarr:/config
+      - ${PVR_PATH}/prowlarr:/config:Z
     restart: unless-stopped
     healthcheck:
       test: curl --fail http://localhost:9696 || exit 1
@@ -118,6 +123,8 @@ services:
     ## https://github.com/linuxserver/docker-radarr/releases
     image: lscr.io/linuxserver/radarr:${RADARR_VERSION:-4.1.0.6175-ls139}
     network_mode: "service:transmission-openvpn"
+    depends_on:
+      - pvr_transmission # for vpn internet access
     container_name: pvr_radarr
     environment:
       - PUID=${PUID}
@@ -125,9 +132,9 @@ services:
       - TZ=${TZ}
       - UMASK=${UMASK}
     volumes:
-      - ${PVR_PATH}/radarr:/config
-      - ${MOVIES_PATH}:/movies
-      - ${DOWNLOADS_PATH}:/downloads
+      - ${PVR_PATH}/radarr:/config:Z
+      - ${MOVIES_PATH}:/movies:z
+      - ${DOWNLOADS_PATH}:/downloads:z
     restart: unless-stopped
     healthcheck:
       test: curl --fail http://localhost:7878 || exit 1
@@ -140,6 +147,8 @@ services:
     ## https://github.com/linuxserver/docker-sonarr/releases 
     image: lscr.io/linuxserver/sonarr:${SONARR_VERSION:-3.0.8.1507-ls147}
     network_mode: "service:transmission-openvpn"
+    depends_on:
+      - pvr_transmission # for vpn internet access
     container_name: pvr_sonarr
     environment:
       - PUID=${PUID}
@@ -147,9 +156,9 @@ services:
       - TZ=${TZ}
       - UMASK=${UMASK}
     volumes:
-      - ${PVR_PATH}/sonarr:/config
-      - ${TV_PATH}:/tv
-      - ${DOWNLOADS_PATH}:/downloads
+      - ${PVR_PATH}/sonarr:/config:Z
+      - ${TV_PATH}:/tv:z
+      - ${DOWNLOADS_PATH}:/downloads:z
     restart: unless-stopped
     healthcheck:
       test: curl --fail http://localhost:8989 || exit 1
@@ -162,6 +171,8 @@ services:
     ## https://github.com/linuxserver/docker-lidarr/releases
     image: lscr.io/linuxserver/lidarr:${LIDARR_VERSION:-1.0.2.2592-ls85}
     network_mode: "service:transmission-openvpn"
+    depends_on:
+      - pvr_transmission # for vpn internet access
     container_name: pvr_lidarr
     environment:
       - PUID=${PUID}
@@ -169,9 +180,9 @@ services:
       - TZ=${TZ}
       - UMASK=${UMASK}
     volumes:
-      - ${PVR_PATH}/lidarr:/config
-      - ${MUSIC_PATH}:/music
-      - ${DOWNLOADS_PATH}:/downloads
+      - ${PVR_PATH}/lidarr:/config:Z
+      - ${MUSIC_PATH}:/music:z
+      - ${DOWNLOADS_PATH}:/downloads:z
     restart: unless-stopped
     healthcheck:
       test: curl --fail http://localhost:8686 || exit 1
@@ -180,6 +191,57 @@ services:
       start_period: 60s
       timeout: 10s
  
+  calibre:
+    # https://github.com/linuxserver/docker-calibre/releases
+    image: lscr.io/linuxserver/calibre:${CALIBRE_VERSION:-v5.44.0-ls169}
+    container_name: pvr_calibre
+    network_mode: "service:transmission-openvpn"
+    depends_on:
+      - pvr_transmission  # for vpn internet access
+    restart: unless-stopped
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK=${UMASK}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${PVR_PATH}/calibre/config:/config:Z
+      - ${AUDIOBOOKS_PATH}:/audiobooks:z
+      - ${BOOKS_PATH}:/ebooks:z
+    healthcheck:
+      test: curl --fail http://localhost:8080 || exit 1
+      interval: 60s
+      retries: 5
+      start_period: 60s
+      timeout: 10s
+
+  # https://github.com/linuxserver/docker-calibre-web
+  calibre-web:
+    # https://github.com/linuxserver/docker-calibre-web/releases
+    image: lscr.io/linuxserver/calibre-web:${CALIBREWEB_VERSION:-0.6.18-ls167}
+    container_name: pvr_calibre_web
+    network_mode: "service:transmission-openvpn"
+    depends_on:
+      - pvr_transmission  # for vpn internet access
+    restart: unless-stopped
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK=${UMASK}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${PVR_PATH}/calibre_web/config:/config:Z
+      - ${AUDIOBOOKS_PATH}:/audiobooks:z
+      - ${BOOKS_PATH}:/ebooks:z
+    healthcheck:
+      test: curl --fail http://localhost:8083 || exit 1
+      interval: 60s
+      retries: 5
+      start_period: 60s
+      timeout: 10s
+
   # readarr:
   #   ## https://github.com/linuxserver/docker-readarr/releases
   #   image: lscr.io/linuxserver/readarr:${READARR_VERSION:-develop}
