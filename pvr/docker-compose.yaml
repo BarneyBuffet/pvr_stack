@@ -191,56 +191,56 @@ services:
       start_period: 60s
       timeout: 10s
  
-  calibre:
-    # https://github.com/linuxserver/docker-calibre/releases
-    image: lscr.io/linuxserver/calibre:${CALIBRE_VERSION:-v5.44.0-ls169}
-    container_name: pvr_calibre
-    network_mode: "service:transmission-openvpn"
-    depends_on:
-      - pvr_transmission  # for vpn internet access
-    restart: unless-stopped
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - UMASK=${UMASK}
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${PVR_PATH}/calibre/config:/config:Z
-      - ${AUDIOBOOKS_PATH}:/audiobooks:z
-      - ${BOOKS_PATH}:/ebooks:z
-    healthcheck:
-      test: curl --fail http://localhost:8080 || exit 1
-      interval: 60s
-      retries: 5
-      start_period: 60s
-      timeout: 10s
+  # calibre:
+  #   # https://github.com/linuxserver/docker-calibre/releases
+  #   image: lscr.io/linuxserver/calibre:${CALIBRE_VERSION:-v5.44.0-ls169}
+  #   container_name: pvr_calibre
+  #   network_mode: "service:transmission-openvpn"
+  #   depends_on:
+  #     - pvr_transmission  # for vpn internet access
+  #   restart: unless-stopped
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=${TZ}
+  #     - UMASK=${UMASK}
+  #   volumes:
+  #     - /etc/localtime:/etc/localtime:ro
+  #     - ${PVR_PATH}/calibre/config:/config:Z
+  #     - ${AUDIOBOOKS_PATH}:/audiobooks:z
+  #     - ${BOOKS_PATH}:/ebooks:z
+  #   healthcheck:
+  #     test: curl --fail http://localhost:8080 || exit 1
+  #     interval: 60s
+  #     retries: 5
+  #     start_period: 60s
+  #     timeout: 10s
 
-  # https://github.com/linuxserver/docker-calibre-web
-  calibre-web:
-    # https://github.com/linuxserver/docker-calibre-web/releases
-    image: lscr.io/linuxserver/calibre-web:${CALIBREWEB_VERSION:-0.6.18-ls167}
-    container_name: pvr_calibre_web
-    network_mode: "service:transmission-openvpn"
-    depends_on:
-      - pvr_transmission  # for vpn internet access
-    restart: unless-stopped
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - UMASK=${UMASK}
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${PVR_PATH}/calibre_web/config:/config:Z
-      - ${AUDIOBOOKS_PATH}:/audiobooks:z
-      - ${BOOKS_PATH}:/ebooks:z
-    healthcheck:
-      test: curl --fail http://localhost:8083 || exit 1
-      interval: 60s
-      retries: 5
-      start_period: 60s
-      timeout: 10s
+  # # https://github.com/linuxserver/docker-calibre-web
+  # calibre-web:
+  #   # https://github.com/linuxserver/docker-calibre-web/releases
+  #   image: lscr.io/linuxserver/calibre-web:${CALIBREWEB_VERSION:-0.6.18-ls167}
+  #   container_name: pvr_calibre_web
+  #   network_mode: "service:transmission-openvpn"
+  #   depends_on:
+  #     - pvr_transmission  # for vpn internet access
+  #   restart: unless-stopped
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=${TZ}
+  #     - UMASK=${UMASK}
+  #   volumes:
+  #     - /etc/localtime:/etc/localtime:ro
+  #     - ${PVR_PATH}/calibre_web/config:/config:Z
+  #     - ${AUDIOBOOKS_PATH}:/audiobooks:z
+  #     - ${BOOKS_PATH}:/ebooks:z
+  #   healthcheck:
+  #     test: curl --fail http://localhost:8083 || exit 1
+  #     interval: 60s
+  #     retries: 5
+  #     start_period: 60s
+  #     timeout: 10s
 
   # readarr:
   #   ## https://github.com/linuxserver/docker-readarr/releases
