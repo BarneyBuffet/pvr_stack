@@ -56,9 +56,9 @@ services:
       - 8989:8989 ## Sonarr WebGUI
       - 8686:8686 ## Lidarr WebGUI
       - 8787:8787 ## Readarr WebGUI
-      - 48084:8080 ## calibre
-      - 48081:8081 ## calibre-web
-      - 48083:8083 ## calibre-web
+      - 8084:8080 ## calibre
+      - 8081:8081 ## calibre-web
+      - 8083:8083 ## calibre-web
     restart: unless-stopped
 
   tdarr:
@@ -223,7 +223,7 @@ services:
   # https://github.com/linuxserver/docker-calibre-web
   calibre-web:
     # https://github.com/linuxserver/docker-calibre-web/releases
-    image: lscr.io/linuxserver/calibre-web:${CALIBREWEB_VERSION:-0.6.18-ls167}
+    image: lscr.io/linuxserver/calibre-web:${CALIBRE_WEB_VERSION:-0.6.18-ls167}
     container_name: pvr_calibre_web
     network_mode: "service:transmission-openvpn"
     depends_on:
@@ -249,45 +249,32 @@ services:
       start_period: 60s
       timeout: 10s
 
-  # readarr:
-  #   ## https://github.com/linuxserver/docker-readarr/releases
-  #   image: lscr.io/linuxserver/readarr:${READARR_VERSION:-develop}
-  #   network_mode: "service:transmission-openvpn"
-  #   container_name: pvr_readarr
-  #   environment:
-  #     - PUID=${PUID}
-  #     - PGID=${PGID}
-  #     - TZ=${TZ}
-  #     - UMASK=${UMASK}
-  #   volumes:
-  #     - ${PVR_PATH}/readarr:/config
-  #     - ${BOOKS_PATH}:/books
-  #     - ${DOWNLOADS_PATH}:/downloads
-  #   restart: unless-stopped
-  #   healthcheck:
-  #     test: curl --fail http://localhost:8787 || exit 1
-  #     interval: 60s
-  #     retries: 5
-  #     start_period: 60s
-  #     timeout: 10s
-
-  # calibre:
-  #   ## https://github.com/linuxserver/docker-calibre/releases
-  #   image: lscr.io/linuxserver/calibre:${CALIBRE_VERSION:-v5.40.0-ls157}
-  #   network_mode: "service:transmission-openvpn"
-  #   container_name: pvr_calibre
-  #   environment:
-  #     - PUID=${PUID}
-  #     - PGID=${PGID}
-  #     - TZ=${TZ}
-  #     - UMASK=${UMASK}
-  #     # - PASSWORD=${CALIBRE_PASSWORD}
-  #     # - CLI_ARGS= #optional
-  #   volumes:
-  #     - ${PVR_PATH}/calibre:/config
-  #     - ${BOOKS_PATH}:/books
-  #     - ${DOWNLOADS_PATH}:/downloads
-  #   restart: unless-stopped
+  readarr:
+    ## https://github.com/linuxserver/docker-readarr/releases
+    image: lscr.io/linuxserver/readarr:${READARR_VERSION:-develop}
+    network_mode: "service:transmission-openvpn"
+    container_name: pvr_readarr
+    depends_on:
+      - pvr_transmission  # for vpn internet access
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK=${UMASK}
+    volumes:
+      - ${PVR_PATH}/readarr:/config:Z
+      - ${BOOKS_PATH}:/books:z
+      - ${DOWNLOADS_PATH}:/downloads:z
+    # Ports go through transmission vpn container
+    # ports:
+    #   - 8787:8787
+    restart: unless-stopped
+    healthcheck:
+      test: curl --fail http://localhost:8787 || exit 1
+      interval: 60s
+      retries: 5
+      start_period: 60s
+      timeout: 10s
 
 #  lazylibrarian:
 #     image: linuxserver/lazylibrarian
@@ -302,29 +289,6 @@ services:
 #         - /srv/dev-disk-by-label-data/appdata/lazylibrarian:/config
 #         - /srv/dev-disk-by-label-data/media/:/media
 #     restart: unless-stopped
-
-  # calibre:
-  #     image: linuxserver/calibre
-  #     network_mode: "service:transmission-openvpn"
-  #     container_name: calibre
-  #     env_file:
-  #         - stack.env
-  #     volumes:
-  #         - /media/${USER}/Data/appdata/calibre:/config
-  #         - /media/${USER}/Data/media/books:/books
-  #         - /media/${USER}/Data/media/books_not_in_library:/books_add_me
-  #     restart: unless-stopped
-      
-  # calibre-web:
-  #     image: linuxserver/calibre-web
-  #     network_mode: "service:transmission-openvpn"
-  #     container_name: calibre-web
-  #     env_file:
-  #         - stack.env
-  #     volumes:
-  #       - /media/${USER}/Data/appdata/calibre-web:/config
-  #       - /media/${USER}/Data/media/books:/books
-  #     restart: unless-stopped    
 
   # plex:
   #     image: linuxserver/plex
