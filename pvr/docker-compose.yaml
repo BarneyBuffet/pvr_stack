@@ -211,8 +211,8 @@ services:
       - ${BOOKS_PATH}:/ebooks:z
     # Ports go through transmission vpn container
     # ports:
-      # - 8081:8081
-      # - 8083:8083
+      # - 8080:8080
+      # - 8084:8081
     healthcheck:
       test: curl --fail http://localhost:8080 || exit 1
       interval: 60s
@@ -264,6 +264,7 @@ services:
     volumes:
       - ${PVR_PATH}/readarr:/config:Z
       - ${BOOKS_PATH}:/books:z
+      - ${AUDIOBOOKS_PATH}:/audiobooks:z
       - ${DOWNLOADS_PATH}:/downloads:z
     # Ports go through transmission vpn container
     # ports:
@@ -289,6 +290,9 @@ services:
 #         - /srv/dev-disk-by-label-data/appdata/lazylibrarian:/config
 #         - /srv/dev-disk-by-label-data/media/:/media
 #     restart: unless-stopped
+
+# Jellyfin
+
 
   # plex:
   #     image: linuxserver/plex
