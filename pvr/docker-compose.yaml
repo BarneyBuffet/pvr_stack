@@ -96,6 +96,12 @@ services:
       - ${TV_PATH}:/home/Tdarr/Media/TVShows:z
       - ${BJJ_PATH}:/home/Tdarr/Media/BJJ:z
     restart: unless-stopped
+    healthcheck:
+      test: curl --fail http://localhost:8265 || exit 1
+      interval: 60s
+      retries: 5
+      start_period: 60s
+      timeout: 10s
 
   prowlarr:
     ## https://github.com/linuxserver/docker-prowlarr/releases
