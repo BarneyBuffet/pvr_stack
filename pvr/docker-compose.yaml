@@ -5,7 +5,7 @@ services:
   ## https://haugene.github.io/docker-transmission-openvpn/
   transmission-openvpn:
     ## https://github.com/haugene/docker-transmission-openvpn/releases
-    image: haugene/transmission-openvpn:${TRANSMISSION_VERSION:-4.0}
+    image: haugene/transmission-openvpn:${TRANSMISSION_VERSION:-latest}
     container_name: pvr_transmission
     volumes:
       - ${DOWNLOADS_PATH}:/data/downloads:z
@@ -63,7 +63,7 @@ services:
 
   tdarr:
     ## https://github.com/users/haveagitgat/packages/container/package/tdarr 
-    image: ghcr.io/haveagitgat/tdarr:${TDARR_VERSION:-2.00.18.2}
+    image: ghcr.io/haveagitgat/tdarr:${TDARR_VERSION:-latest}
     container_name: pvr_tdarr
     network_mode: "service:transmission-openvpn"
     depends_on:
@@ -121,7 +121,7 @@ services:
  
   radarr:
     ## https://github.com/linuxserver/docker-radarr/releases
-    image: lscr.io/linuxserver/radarr:${RADARR_VERSION:-4.1.0.6175-ls139}
+    image: lscr.io/linuxserver/radarr:${RADARR_VERSION:-latest}
     network_mode: "service:transmission-openvpn"
     depends_on:
       - pvr_transmission # for vpn internet access
@@ -145,7 +145,7 @@ services:
  
   sonarr:
     ## https://github.com/linuxserver/docker-sonarr/releases 
-    image: lscr.io/linuxserver/sonarr:${SONARR_VERSION:-3.0.8.1507-ls147}
+    image: lscr.io/linuxserver/sonarr:${SONARR_VERSION:-latest}
     network_mode: "service:transmission-openvpn"
     depends_on:
       - pvr_transmission # for vpn internet access
@@ -169,7 +169,7 @@ services:
  
   lidarr:
     ## https://github.com/linuxserver/docker-lidarr/releases
-    image: lscr.io/linuxserver/lidarr:${LIDARR_VERSION:-1.0.2.2592-ls85}
+    image: lscr.io/linuxserver/lidarr:${LIDARR_VERSION:-latest}
     network_mode: "service:transmission-openvpn"
     depends_on:
       - pvr_transmission # for vpn internet access
@@ -193,7 +193,7 @@ services:
  
   calibre:
     # https://github.com/linuxserver/docker-calibre/releases
-    image: lscr.io/linuxserver/calibre:${CALIBRE_VERSION:-v5.44.0-ls169}
+    image: lscr.io/linuxserver/calibre:${CALIBRE_VERSION:-latest}
     container_name: pvr_calibre
     network_mode: "service:transmission-openvpn"
     depends_on:
