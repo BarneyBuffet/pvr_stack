@@ -223,7 +223,7 @@ services:
   # https://github.com/linuxserver/docker-calibre-web
   calibre-web:
     # https://github.com/linuxserver/docker-calibre-web/releases
-    image: lscr.io/linuxserver/calibre-web:${CALIBRE_WEB_VERSION:-0.6.18-ls167}
+    image: lscr.io/linuxserver/calibre-web:${CALIBRE_WEB_VERSION:-latest}
     container_name: pvr_calibre_web
     network_mode: "service:transmission-openvpn"
     depends_on:
