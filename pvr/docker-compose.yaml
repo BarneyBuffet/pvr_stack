@@ -91,6 +91,7 @@ services:
       # - nodeIP=0.0.0.0
       # - nodePort=8267
     volumes:
+      - /etc/localtime:/etc/localtime:ro
       - ${PVR_PATH}/tdarr/server:/app/server:Z
       - ${PVR_PATH}/tdarr/configs:/app/configs:Z
       - ${PVR_PATH}/tdarr/logs:/app/logs:Z
@@ -120,6 +121,7 @@ services:
       - TZ=${TZ}
       - UMASK=${UMASK}
     volumes:
+      - /etc/localtime:/etc/localtime:ro
       - ${PVR_PATH}/prowlarr:/config:Z
     restart: unless-stopped
     healthcheck:
@@ -142,6 +144,7 @@ services:
       - TZ=${TZ}
       - UMASK=${UMASK}
     volumes:
+      - /etc/localtime:/etc/localtime:ro
       - ${PVR_PATH}/radarr:/config:Z
       - ${MOVIES_PATH}:/movies:z
       - ${DOWNLOADS_PATH}:/downloads:z
@@ -166,6 +169,7 @@ services:
       - TZ=${TZ}
       - UMASK=${UMASK}
     volumes:
+      - /etc/localtime:/etc/localtime:ro
       - ${PVR_PATH}/sonarr:/config:Z
       - ${TV_PATH}:/tv:z
       - ${DOWNLOADS_PATH}:/downloads:z
@@ -190,6 +194,7 @@ services:
       - TZ=${TZ}
       - UMASK=${UMASK}
     volumes:
+      - /etc/localtime:/etc/localtime:ro
       - ${PVR_PATH}/lidarr:/config:Z
       - ${MUSIC_PATH}:/music:z
       - ${DOWNLOADS_PATH}:/downloads:z
@@ -272,6 +277,7 @@ services:
       - TZ=${TZ}
       - UMASK=${UMASK}
     volumes:
+      - /etc/localtime:/etc/localtime:ro
       - ${PVR_PATH}/readarr:/config:Z
       - ${BOOKS_PATH}:/books:z
       - ${AUDIOBOOKS_PATH}:/audiobooks:z
@@ -300,6 +306,7 @@ services:
       - TZ=${TZ}
       - UMASK=${UMASK}
     volumes:
+      - /etc/localtime:/etc/localtime:ro
       - ${PVR_PATH}/jellyfin:/config:Z
       - ${AUDIOBOOKS_PATH}:/data/audiobooks:z
       - ${MOVIES_PATH}:/data/movies:z
@@ -331,10 +338,8 @@ services:
 #         #- DOCKER_MODS=linuxserver/calibre-web:calibre #optional
 #     volumes:
 #         - /srv/dev-disk-by-label-data/appdata/lazylibrarian:/config
-#         - /srv/dev-disk-by-label-data/media/:/media
+#         - /srv/dev-disk-by-label-data/media/:/media 
 #     restart: unless-stopped
-
-
 
   # plex:
   #     image: linuxserver/plex
