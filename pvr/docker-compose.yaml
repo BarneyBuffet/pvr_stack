@@ -56,6 +56,7 @@ services:
       - 8989:8989 ## Sonarr WebGUI
       - 8686:8686 ## Lidarr WebGUI
       - 8787:8787 ## Readarr WebGUI
+      - 5299:5299 ## Lazylibrarian WebGUI
       - 8084:8080 ## calibre
       - 8081:8081 ## calibre-web
       - 8083:8083 ## calibre-web
@@ -143,6 +144,7 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
       - UMASK=${UMASK}
+      - DOCKER_MODS=lscr.io/linuxserver/mods:radarr-striptracks #optional
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${PVR_PATH}/radarr:/config:Z
@@ -168,6 +170,7 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
       - UMASK=${UMASK}
+      - DOCKER_MODS=lscr.io/linuxserver/mods:sonarr-striptracks
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${PVR_PATH}/sonarr:/config:Z
@@ -193,6 +196,7 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
       - UMASK=${UMASK}
+      - DOCKER_MODS=lscr.io/linuxserver/mods:lidarr-flac2mp3 #optional
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${PVR_PATH}/lidarr:/config:Z
@@ -305,6 +309,7 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
       - UMASK=${UMASK}
+      - DOCKER_MODS=lscr.io/linuxserver/mods:jellyfin-opencl-intel #optional
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${PVR_PATH}/jellyfin:/config:Z
@@ -327,19 +332,35 @@ services:
       start_period: 60s
       timeout: 10s
 
-#  lazylibrarian:
-#     image: linuxserver/lazylibrarian
-#     network_mode: "service:transmission-openvpn"
-#     container_name: lazylibrarian
-#     environment:
-#         - PUID=1000
-#         - PGID=100
-#          - TZ=America/New_York
-#         #- DOCKER_MODS=linuxserver/calibre-web:calibre #optional
-#     volumes:
-#         - /srv/dev-disk-by-label-data/appdata/lazylibrarian:/config
-#         - /srv/dev-disk-by-label-data/media/:/media 
-#     restart: unless-stopped
+  lazylibrarian:
+    # https://github.com/linuxserver/docker-lazylibrarian/releases
+    image: lscr.io/linuxserver/lazylibrarian:${LAZYLIBRIAN_VERSION:-latest}
+    container_name: pvr_lazylibrarian
+    network_mode: "service:transmission-openvpn"
+    depends_on:
+      - pvr_transmission  # for vpn internet access
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK=${UMASK}
+      - DOCKER_MODS=lscr.io/linuxserver/calibre-web:calibre|lscr.io/linuxserver/mods:lazylibrarian-ffmpeg #optional
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${PVR_PATH}/lazylibrarian:/config:Z
+      - ${BOOKS_PATH}:/books:z
+      - ${AUDIOBOOKS_PATH}:/audiobooks:z
+      - ${DOWNLOADS_PATH}:/downloads:z
+    # Ports go through transmission vpn container
+    # ports:
+    #   - 5299:5299
+    restart: unless-stopped
+    healthcheck:
+      test: curl --fail http://localhost:5299 || exit 1
+      interval: 60s
+      retries: 5
+      start_period: 60s
+      timeout: 10s
 
   # plex:
   #     image: linuxserver/plex
