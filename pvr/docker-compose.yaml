@@ -293,39 +293,39 @@ services:
       start_period: 60s
       timeout: 10s
 
-  jellyfin:
-    ## https://github.com/linuxserver/docker-jellyfin/releases
-    image: lscr.io/linuxserver/jellyfin:${JELLYFIN_VERSION:-latest}
-    container_name: pvr_jellyfin
-    network_mode: "service:transmission-openvpn"
-    depends_on:
-      - pvr_transmission  # for vpn internet access
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - UMASK=${UMASK}
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${PVR_PATH}/jellyfin:/config:Z
-      - ${AUDIOBOOKS_PATH}:/data/audiobooks:z
-      - ${MOVIES_PATH}:/data/movies:z
-      - ${TV_PATH}:/data/tv:z
-      - ${MUSIC_PATH}:/data/music:z
-      - ${BJJ_PATH}:/data/bjj:z
-    # Ports go through transmission vpn container
-    # ports:
-    #   - 8096:8096
-    #   - 8920:8920 #optional
-    #   - 7359:7359/udp #optional
-    #   - 1900:1900/udp #optional
-    restart: unless-stopped
-    healthcheck:
-      test: curl --fail http://localhost:8096 || exit 1
-      interval: 60s
-      retries: 5
-      start_period: 60s
-      timeout: 10s
+  # jellyfin:
+  #   ## https://github.com/linuxserver/docker-jellyfin/releases
+  #   image: lscr.io/linuxserver/jellyfin:${JELLYFIN_VERSION:-latest}
+  #   container_name: pvr_jellyfin
+  #   network_mode: "service:transmission-openvpn"
+  #   depends_on:
+  #     - pvr_transmission  # for vpn internet access
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=${TZ}
+  #     - UMASK=${UMASK}
+  #   volumes:
+  #     - /etc/localtime:/etc/localtime:ro
+  #     - ${PVR_PATH}/jellyfin:/config:Z
+  #     - ${AUDIOBOOKS_PATH}:/data/audiobooks:z
+  #     - ${MOVIES_PATH}:/data/movies:z
+  #     - ${TV_PATH}:/data/tv:z
+  #     - ${MUSIC_PATH}:/data/music:z
+  #     - ${BJJ_PATH}:/data/bjj:z
+  #   # Ports go through transmission vpn container
+  #   # ports:
+  #   #   - 8096:8096
+  #   #   - 8920:8920 #optional
+  #   #   - 7359:7359/udp #optional
+  #   #   - 1900:1900/udp #optional
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: curl --fail http://localhost:8096 || exit 1
+  #     interval: 60s
+  #     retries: 5
+  #     start_period: 60s
+  #     timeout: 10s
 
 #  lazylibrarian:
 #     image: linuxserver/lazylibrarian
