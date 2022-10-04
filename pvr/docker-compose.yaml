@@ -125,12 +125,12 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${PVR_PATH}/prowlarr:/config:Z
     restart: unless-stopped
-    healthcheck:
-      test: curl --fail http://localhost:9696 || exit 1
-      interval: 60s
-      retries: 5
-      start_period: 60s
-      timeout: 10s
+    # healthcheck:
+    #   test: curl --fail http://localhost:9696 || exit 1
+    #   interval: 60s
+    #   retries: 5
+    #   start_period: 60s
+    #   timeout: 10s
  
   radarr:
     ## https://github.com/linuxserver/docker-radarr/releases
@@ -138,6 +138,7 @@ services:
     network_mode: "service:transmission-openvpn"
     depends_on:
       - pvr_transmission # for vpn internet access
+      - pvr_prowlarr
     container_name: pvr_radarr
     environment:
       - PUID=${PUID}
@@ -151,12 +152,12 @@ services:
       - ${MOVIES_PATH}:/movies:z
       - ${DOWNLOADS_PATH}:/downloads:z
     restart: unless-stopped
-    healthcheck:
-      test: curl --fail http://localhost:7878 || exit 1
-      interval: 60s
-      retries: 5
-      start_period: 60s
-      timeout: 10s
+    # healthcheck:
+    #   test: curl --fail http://localhost:7878 || exit 1
+    #   interval: 60s
+    #   retries: 5
+    #   start_period: 60s
+    #   timeout: 10s
  
   sonarr:
     ## https://github.com/linuxserver/docker-sonarr/releases 
@@ -164,6 +165,7 @@ services:
     network_mode: "service:transmission-openvpn"
     depends_on:
       - pvr_transmission # for vpn internet access
+      - pvr_prowlarr
     container_name: pvr_sonarr
     environment:
       - PUID=${PUID}
@@ -177,12 +179,12 @@ services:
       - ${TV_PATH}:/tv:z
       - ${DOWNLOADS_PATH}:/downloads:z
     restart: unless-stopped
-    healthcheck:
-      test: curl --fail http://localhost:8989 || exit 1
-      interval: 60s
-      retries: 5
-      start_period: 60s
-      timeout: 10s
+    # healthcheck:
+    #   test: curl --fail http://localhost:8989 || exit 1
+    #   interval: 60s
+    #   retries: 5
+    #   start_period: 60s
+    #   timeout: 10s
  
   lidarr:
     ## https://github.com/linuxserver/docker-lidarr/releases
@@ -190,6 +192,7 @@ services:
     network_mode: "service:transmission-openvpn"
     depends_on:
       - pvr_transmission # for vpn internet access
+      - pvr_prowlarr
     container_name: pvr_lidarr
     environment:
       - PUID=${PUID}
@@ -203,99 +206,12 @@ services:
       - ${MUSIC_PATH}:/music:z
       - ${DOWNLOADS_PATH}:/downloads:z
     restart: unless-stopped
-    healthcheck:
-      test: curl --fail http://localhost:8686 || exit 1
-      interval: 60s
-      retries: 5
-      start_period: 60s
-      timeout: 10s
- 
-  calibre:
-    # https://github.com/linuxserver/docker-calibre/releases
-    image: lscr.io/linuxserver/calibre:${CALIBRE_VERSION:-latest}
-    container_name: pvr_calibre
-    network_mode: "service:transmission-openvpn"
-    depends_on:
-      - pvr_transmission  # for vpn internet access
-    restart: unless-stopped
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - UMASK=${UMASK}
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${PVR_PATH}/calibre:/config:Z
-      - ${AUDIOBOOKS_PATH}:/audiobooks:z
-      - ${BOOKS_PATH}:/ebooks:z
-    # Ports go through transmission vpn container
-    # ports:
-      # - 8080:8080
-      # - 8084:8081
-    healthcheck:
-      test: curl --fail http://localhost:8080 || exit 1
-      interval: 60s
-      retries: 5
-      start_period: 60s
-      timeout: 10s
-
-  # https://github.com/linuxserver/docker-calibre-web
-  calibre-web:
-    # https://github.com/linuxserver/docker-calibre-web/releases
-    image: lscr.io/linuxserver/calibre-web:${CALIBRE_WEB_VERSION:-latest}
-    container_name: pvr_calibre_web
-    network_mode: "service:transmission-openvpn"
-    depends_on:
-      - pvr_transmission  # for vpn internet access
-    restart: unless-stopped
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - UMASK=${UMASK}
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${PVR_PATH}/calibre_web:/config:Z
-      - ${AUDIOBOOKS_PATH}:/audiobooks:z
-      - ${BOOKS_PATH}:/ebooks:z
-    # Ports go through transmission vpn container
-    # ports:
-    #   - 8084:8080
-    healthcheck:
-      test: curl --fail http://localhost:8083 || exit 1
-      interval: 60s
-      retries: 5
-      start_period: 60s
-      timeout: 10s
-
-  readarr:
-    ## https://github.com/linuxserver/docker-readarr/releases
-    image: lscr.io/linuxserver/readarr:${READARR_VERSION:-develop}
-    network_mode: "service:transmission-openvpn"
-    container_name: pvr_readarr
-    depends_on:
-      - pvr_transmission  # for vpn internet access
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - UMASK=${UMASK}
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${PVR_PATH}/readarr:/config:Z
-      - ${BOOKS_PATH}:/books:z
-      - ${AUDIOBOOKS_PATH}:/audiobooks:z
-      - ${DOWNLOADS_PATH}:/downloads:z
-    # Ports go through transmission vpn container
-    # ports:
-    #   - 8787:8787
-    restart: unless-stopped
-    healthcheck:
-      test: curl --fail http://localhost:8787 || exit 1
-      interval: 60s
-      retries: 5
-      start_period: 60s
-      timeout: 10s
+    # healthcheck:
+    #   test: curl --fail http://localhost:8686 || exit 1
+    #   interval: 60s
+    #   retries: 5
+    #   start_period: 60s
+    #   timeout: 10s
 
   jellyfin:
     ## https://github.com/linuxserver/docker-jellyfin/releases
@@ -325,42 +241,42 @@ services:
     #   - 7359:7359/udp #optional
     #   - 1900:1900/udp #optional
     restart: unless-stopped
-    healthcheck:
-      test: curl --fail http://localhost:8096 || exit 1
-      interval: 60s
-      retries: 5
-      start_period: 60s
-      timeout: 10s
+    # healthcheck:
+    #   test: curl --fail http://localhost:8096 || exit 1
+    #   interval: 60s
+    #   retries: 5
+    #   start_period: 60s
+    #   timeout: 10s
 
-  lazylibrarian:
-    # https://github.com/linuxserver/docker-lazylibrarian/releases
-    image: lscr.io/linuxserver/lazylibrarian:${LAZYLIBRIAN_VERSION:-latest}
-    container_name: pvr_lazylibrarian
-    network_mode: "service:transmission-openvpn"
-    depends_on:
-      - pvr_transmission  # for vpn internet access
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - UMASK=${UMASK}
-      - DOCKER_MODS=lscr.io/linuxserver/calibre-web:calibre|lscr.io/linuxserver/mods:lazylibrarian-ffmpeg #optional
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${PVR_PATH}/lazylibrarian:/config:Z
-      - ${BOOKS_PATH}:/books:z
-      - ${AUDIOBOOKS_PATH}:/audiobooks:z
-      - ${DOWNLOADS_PATH}:/downloads:z
-    # Ports go through transmission vpn container
-    # ports:
-    #   - 5299:5299
-    restart: unless-stopped
-    healthcheck:
-      test: curl --fail http://localhost:5299 || exit 1
-      interval: 60s
-      retries: 5
-      start_period: 60s
-      timeout: 10s
+  # lazylibrarian:
+  #   # https://github.com/linuxserver/docker-lazylibrarian/releases
+  #   image: lscr.io/linuxserver/lazylibrarian:${LAZYLIBRIAN_VERSION:-latest}
+  #   container_name: pvr_lazylibrarian
+  #   network_mode: "service:transmission-openvpn"
+  #   depends_on:
+  #     - pvr_transmission  # for vpn internet access
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=${TZ}
+  #     - UMASK=${UMASK}
+  #     - DOCKER_MODS=lscr.io/linuxserver/calibre-web:calibre|lscr.io/linuxserver/mods:lazylibrarian-ffmpeg #optional
+  #   volumes:
+  #     - /etc/localtime:/etc/localtime:ro
+  #     - ${PVR_PATH}/lazylibrarian:/config:Z
+  #     - ${BOOKS_PATH}:/books:z
+  #     - ${AUDIOBOOKS_PATH}:/audiobooks:z
+  #     - ${DOWNLOADS_PATH}:/downloads:z
+  #   # Ports go through transmission vpn container
+  #   # ports:
+  #   #   - 5299:5299
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: curl --fail http://localhost:5299 || exit 1
+  #     interval: 60s
+  #     retries: 5
+  #     start_period: 60s
+  #     timeout: 10s
 
   # plex:
   #     image: linuxserver/plex
@@ -375,15 +291,90 @@ services:
   #         - stack.env
   #     restart: unless-stopped    
 
-  # soulseek:
-  #     image: realies/soulseek
-  #     network_mode: "service:transmission-openvpn"
-  #     container_name: soulseek
-  #     volumes:
-  #       - /media/${USER}/Data/appdata/soulseek:/data/.SoulseekQt
-  #       - /media/${USER}/Data/downloads/soulseekqt:/data/Soulseek Downloads
-  #       - /home/${USER}/.local/log/soulseek:/data/Soulseek Chat Logs
-  #       - /media/${USER}/Data/media/music/:/data/public/music
-  #     env_file:
-  #       - stack.env
-  #     restart: unless-stopped
+# calibre:
+  #   # https://github.com/linuxserver/docker-calibre/releases
+  #   image: lscr.io/linuxserver/calibre:${CALIBRE_VERSION:-latest}
+  #   container_name: pvr_calibre
+  #   network_mode: "service:transmission-openvpn"
+  #   depends_on:
+  #     - pvr_transmission  # for vpn internet access
+  #   restart: unless-stopped
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=${TZ}
+  #     - UMASK=${UMASK}
+  #   volumes:
+  #     - /etc/localtime:/etc/localtime:ro
+  #     - ${PVR_PATH}/calibre:/config:Z
+  #     - ${AUDIOBOOKS_PATH}:/audiobooks:z
+  #     - ${BOOKS_PATH}:/ebooks:z
+  #   # Ports go through transmission vpn container
+  #   # ports:
+  #     # - 8080:8080
+  #     # - 8084:8081
+  #   healthcheck:
+  #     test: curl --fail http://localhost:8080 || exit 1
+  #     interval: 60s
+  #     retries: 5
+  #     start_period: 60s
+  #     timeout: 10s
+
+  # # https://github.com/linuxserver/docker-calibre-web
+  # calibre-web:
+  #   # https://github.com/linuxserver/docker-calibre-web/releases
+  #   image: lscr.io/linuxserver/calibre-web:${CALIBRE_WEB_VERSION:-latest}
+  #   container_name: pvr_calibre_web
+  #   network_mode: "service:transmission-openvpn"
+  #   depends_on:
+  #     - pvr_transmission  # for vpn internet access
+  #   restart: unless-stopped
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=${TZ}
+  #     - UMASK=${UMASK}
+  #   volumes:
+  #     - /etc/localtime:/etc/localtime:ro
+  #     - ${PVR_PATH}/calibre_web:/config:Z
+  #     - ${AUDIOBOOKS_PATH}:/audiobooks:z
+  #     - ${BOOKS_PATH}:/ebooks:z
+  #   # Ports go through transmission vpn container
+  #   # ports:
+  #   #   - 8084:8080
+  #   healthcheck:
+  #     test: curl --fail http://localhost:8083 || exit 1
+  #     interval: 60s
+  #     retries: 5
+  #     start_period: 60s
+  #     timeout: 10s
+
+  # readarr:
+  #   ## https://github.com/linuxserver/docker-readarr/releases
+  #   image: lscr.io/linuxserver/readarr:${READARR_VERSION:-develop}
+  #   network_mode: "service:transmission-openvpn"
+  #   container_name: pvr_readarr
+  #   depends_on:
+  #     - pvr_transmission  # for vpn internet access
+  #     - pvr_prowlarr
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=${TZ}
+  #     - UMASK=${UMASK}
+  #   volumes:
+  #     - /etc/localtime:/etc/localtime:ro
+  #     - ${PVR_PATH}/readarr:/config:Z
+  #     - ${BOOKS_PATH}:/books:z
+  #     - ${AUDIOBOOKS_PATH}:/audiobooks:z
+  #     - ${DOWNLOADS_PATH}:/downloads:z
+  #   # Ports go through transmission vpn container
+  #   # ports:
+  #   #   - 8787:8787
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: curl --fail http://localhost:8787 || exit 1
+  #     interval: 60s
+  #     retries: 5
+  #     start_period: 60s
+  #     timeout: 10s
