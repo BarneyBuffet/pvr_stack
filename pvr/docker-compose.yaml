@@ -148,7 +148,6 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
       - UMASK=${UMASK}
-      - DOCKER_MODS=lscr.io/linuxserver/mods:radarr-striptracks #optional
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${PVR_PATH}/radarr:/config:Z
@@ -175,7 +174,6 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
       - UMASK=${UMASK}
-      - DOCKER_MODS=lscr.io/linuxserver/mods:sonarr-striptracks
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${PVR_PATH}/sonarr:/config:Z
