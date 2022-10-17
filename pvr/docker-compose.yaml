@@ -65,8 +65,8 @@ services:
       - ${CALIBRE_WEB_GUI_PORT:-8083}:8083 ## calibre-web
       - ${JELLYFIN_PORT:-8096}:8096 ## Jellyfin http WebGUI
       - ${JELLYFIN_GUI_PORT:-8920}:8920 ## Optional Jellyfin https WebGUI
-      - ${JELLYFIN_DISCO_PORT:-7359}:7359/udp ## Optional Jellyfin discoverable
-      - ${JELLYFIN_DLNA_PORT:-1900}:1900/udp ## Optional Jellyfin DNLA
+      # - ${JELLYFIN_DISCO_PORT:-7359}:7359/udp ## Optional Jellyfin discoverable
+      # - ${JELLYFIN_DLNA_PORT:-1900}:1900/udp ## Optional Jellyfin DNLA
     restart: unless-stopped
 
   tdarr:
@@ -75,7 +75,7 @@ services:
     container_name: pvr_tdarr
     network_mode: "service:transmission-openvpn"
     depends_on:
-      - pvr_transmission # for vpn internet access
+      - transmission-openvpn # for vpn internet access
     # ports: ## Not needed because we are going through service:transmission-openvpn 
       # - 8265:8265 # webUI port
       # - 8266:8266 # server port
@@ -105,19 +105,19 @@ services:
       - ${TV_PATH}:/home/Tdarr/Media/TVShows:z
       - ${BJJ_PATH}:/home/Tdarr/Media/BJJ:z
     restart: unless-stopped
-    healthcheck:
-      test: curl --fail http://localhost:8265 || exit 1
-      interval: 60s
-      retries: 5
-      start_period: 60s
-      timeout: 10s
+    # healthcheck:
+    #   test: curl --fail http://localhost:8265 || exit 1
+    #   interval: 60s
+    #   retries: 5
+    #   start_period: 60s
+    #   timeout: 10s
 
   prowlarr:
     ## https://github.com/linuxserver/docker-prowlarr/releases
     image: lscr.io/linuxserver/prowlarr:${PROWLARR_VERSION:-develop}
     network_mode: "service:transmission-openvpn"
     depends_on:
-      - pvr_transmission # for vpn internet access
+      - transmission-openvpn # for vpn internet access
     container_name: pvr_prowlarr
     environment:
       - PUID=${PUID}
@@ -140,8 +140,8 @@ services:
     image: lscr.io/linuxserver/radarr:${RADARR_VERSION:-latest}
     network_mode: "service:transmission-openvpn"
     depends_on:
-      - pvr_transmission # for vpn internet access
-      - pvr_prowlarr
+      - transmission-openvpn # for vpn internet access
+      - prowlarr
     container_name: pvr_radarr
     environment:
       - PUID=${PUID}
@@ -167,8 +167,8 @@ services:
     image: lscr.io/linuxserver/sonarr:${SONARR_VERSION:-latest}
     network_mode: "service:transmission-openvpn"
     depends_on:
-      - pvr_transmission # for vpn internet access
-      - pvr_prowlarr
+      - transmission-openvpn # for vpn internet access
+      - prowlarr
     container_name: pvr_sonarr
     environment:
       - PUID=${PUID}
@@ -194,8 +194,8 @@ services:
     image: lscr.io/linuxserver/lidarr:${LIDARR_VERSION:-latest}
     network_mode: "service:transmission-openvpn"
     depends_on:
-      - pvr_transmission # for vpn internet access
-      - pvr_prowlarr
+      - transmission-openvpn # for vpn internet access
+      - prowlarr
     container_name: pvr_lidarr
     environment:
       - PUID=${PUID}
@@ -222,7 +222,7 @@ services:
     container_name: pvr_jellyfin
     network_mode: "service:transmission-openvpn"
     depends_on:
-      - pvr_transmission  # for vpn internet access
+      - transmission-openvpn # for vpn internet access
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
