@@ -49,24 +49,24 @@ services:
       options:
         max-size: 10m
     ports:
-      - 9091:9091 ## Transmission WebGUI
-      - 8265:8265 ## Tdarr WebGUI
-      - 8266:8266 ## Tdarr server port
-      - 8267:8267 ## Tdarr internal node port
-      - 8268:8268 ## Tdarr extra node port
-      - 9696:9696 ## Prowlarr WebGUI
-      - 7878:7878 ## Radarr WebGUI
-      - 8989:8989 ## Sonarr WebGUI
-      - 8686:8686 ## Lidarr WebGUI
-      - 8787:8787 ## Readarr WebGUI
-      - 5299:5299 ## Lazylibrarian WebGUI
-      - 8084:8080 ## calibre
-      - 8081:8081 ## calibre-web
-      - 8083:8083 ## calibre-web
-      - 8096:8096 ## Jellyfin http WebGUI
-      - 8920:8920 ## Optional Jellyfin https WebGUI
-      - 7359:7359/udp ## Optional Jellyfin discoverable
-      # - 1900:1900/udp ## Optional Jellyfin DNLA
+      - ${TRANSMISSION_GUI_PORT:-9091}:9091 ## Transmission WebGUI
+      - ${TDARR_GUI_PORT:-8265}:8265 ## Tdarr WebGUI
+      - ${TDARR_SERVER_PORT:-8266}:8266 ## Tdarr server port
+      - ${TDARR_NODE_PORT:-8267}:8267 ## Tdarr internal node port
+      - ${TDARR_EXTRA_NODE_PORT:-8268}:8268 ## Tdarr extra node port
+      - ${PROWLARR_GUI_PORT:-9696}:9696 ## Prowlarr WebGUI
+      - ${RADARR_GUI_PORT:-7878}:7878 ## Radarr WebGUI
+      - ${SONARR_GUI_PORT:-8989}:8989 ## Sonarr WebGUI
+      - ${LIDARR_GUI_PORT:-8686}:8686 ## Lidarr WebGUI
+      - ${READARR_GUI_PORT:-8787}:8787 ## Readarr WebGUI
+      - ${LIBRARIAN_GUI_PORT:-5299}:5299 ## Lazylibrarian WebGUI
+      - ${CALIBRE_DESKTOP_PORT:-8080}:8080 ## calibre
+      - ${CALIBRE_GUI_PORT:-8081}:8081 ## calibre
+      - ${CALIBRE_WEB_GUI_PORT:-8083}:8083 ## calibre-web
+      - ${JELLYFIN_PORT:-8096}:8096 ## Jellyfin http WebGUI
+      - ${JELLYFIN_GUI_PORT:-8920}:8920 ## Optional Jellyfin https WebGUI
+      - ${JELLYFIN_DISCO_PORT:-7359}:7359/udp ## Optional Jellyfin discoverable
+      - ${JELLYFIN_DLNA_PORT:-1900}:1900/udp ## Optional Jellyfin DNLA
     restart: unless-stopped
 
   tdarr:
