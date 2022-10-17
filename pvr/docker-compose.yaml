@@ -51,6 +51,9 @@ services:
     ports:
       - 9091:9091 ## Transmission WebGUI
       - 8265:8265 ## Tdarr WebGUI
+      - 8266:8266 ## Tdarr server port
+      - 8267:8267 ## Tdarr internal node port
+      - 8268:8268 ## Tdarr extra node port
       - 9696:9696 ## Prowlarr WebGUI
       - 7878:7878 ## Radarr WebGUI
       - 8989:8989 ## Sonarr WebGUI
