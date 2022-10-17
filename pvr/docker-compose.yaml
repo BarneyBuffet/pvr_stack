@@ -65,8 +65,8 @@ services:
       - ${CALIBRE_WEB_GUI_PORT:-8083}:8083 ## calibre-web
       - ${JELLYFIN_PORT:-8096}:8096 ## Jellyfin http WebGUI
       - ${JELLYFIN_GUI_PORT:-8920}:8920 ## Optional Jellyfin https WebGUI
-      # - ${JELLYFIN_DISCO_PORT:-7359}:7359/udp ## Optional Jellyfin discoverable
-      # - ${JELLYFIN_DLNA_PORT:-1900}:1900/udp ## Optional Jellyfin DNLA
+      - ${JELLYFIN_DISCO_PORT:-7359}:7359/udp ## Optional Jellyfin discoverable
+      - ${JELLYFIN_DLNA_PORT:-1900}:1900/udp ## Optional Jellyfin DNLA
     restart: unless-stopped
 
   tdarr:
@@ -105,12 +105,6 @@ services:
       - ${TV_PATH}:/home/Tdarr/Media/TVShows:z
       - ${BJJ_PATH}:/home/Tdarr/Media/BJJ:z
     restart: unless-stopped
-    # healthcheck:
-    #   test: curl --fail http://localhost:8265 || exit 1
-    #   interval: 60s
-    #   retries: 5
-    #   start_period: 60s
-    #   timeout: 10s
 
   prowlarr:
     ## https://github.com/linuxserver/docker-prowlarr/releases
@@ -128,13 +122,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${PVR_PATH}/prowlarr:/config:Z
     restart: unless-stopped
-    # healthcheck:
-    #   test: curl --fail http://localhost:9696 || exit 1
-    #   interval: 60s
-    #   retries: 5
-    #   start_period: 60s
-    #   timeout: 10s
- 
+
   radarr:
     ## https://github.com/linuxserver/docker-radarr/releases
     image: lscr.io/linuxserver/radarr:${RADARR_VERSION:-latest}
@@ -154,12 +142,6 @@ services:
       - ${MOVIES_PATH}:/movies:z
       - ${DOWNLOADS_PATH}:/downloads:z
     restart: unless-stopped
-    # healthcheck:
-    #   test: curl --fail http://localhost:7878 || exit 1
-    #   interval: 60s
-    #   retries: 5
-    #   start_period: 60s
-    #   timeout: 10s
  
   sonarr:
     ## https://github.com/linuxserver/docker-sonarr/releases 
@@ -180,12 +162,6 @@ services:
       - ${TV_PATH}:/tv:z
       - ${DOWNLOADS_PATH}:/downloads:z
     restart: unless-stopped
-    # healthcheck:
-    #   test: curl --fail http://localhost:8989 || exit 1
-    #   interval: 60s
-    #   retries: 5
-    #   start_period: 60s
-    #   timeout: 10s
  
   lidarr:
     ## https://github.com/linuxserver/docker-lidarr/releases
@@ -207,12 +183,6 @@ services:
       - ${MUSIC_PATH}:/music:z
       - ${DOWNLOADS_PATH}:/downloads:z
     restart: unless-stopped
-    # healthcheck:
-    #   test: curl --fail http://localhost:8686 || exit 1
-    #   interval: 60s
-    #   retries: 5
-    #   start_period: 60s
-    #   timeout: 10s
 
   jellyfin:
     ## https://github.com/linuxserver/docker-jellyfin/releases
@@ -242,12 +212,6 @@ services:
     #   - 7359:7359/udp #optional
     #   - 1900:1900/udp #optional
     restart: unless-stopped
-    # healthcheck:
-    #   test: curl --fail http://localhost:8096 || exit 1
-    #   interval: 60s
-    #   retries: 5
-    #   start_period: 60s
-    #   timeout: 10s
 
   # lazylibrarian:
   #   # https://github.com/linuxserver/docker-lazylibrarian/releases
