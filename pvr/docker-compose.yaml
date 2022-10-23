@@ -196,8 +196,8 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${PVR_PATH}/bazarr:/config:Z
-      - ${MUSIC_PATH}:/music:z
-      - ${DOWNLOADS_PATH}:/downloads:z
+      - ${MOVIES_PATH}:/movies:z
+      - ${TV_PATH}:/tv:z
     restart: unless-stopped
     # Ports go through transmission vpn container
 
