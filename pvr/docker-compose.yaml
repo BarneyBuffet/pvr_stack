@@ -49,24 +49,25 @@ services:
       options:
         max-size: 10m
     ports:
-      - ${TRANSMISSION_GUI_PORT:-9091}:9091 ## Transmission WebGUI
-      - ${TDARR_GUI_PORT:-8265}:8265 ## Tdarr WebGUI
-      - ${TDARR_SERVER_PORT:-8266}:8266 ## Tdarr server port
-      - ${TDARR_NODE_PORT:-8267}:8267 ## Tdarr internal node port
-      - ${TDARR_EXTRA_NODE_PORT:-8268}:8268 ## Tdarr extra node port
-      - ${PROWLARR_GUI_PORT:-9696}:9696 ## Prowlarr WebGUI
-      - ${RADARR_GUI_PORT:-7878}:7878 ## Radarr WebGUI
-      - ${SONARR_GUI_PORT:-8989}:8989 ## Sonarr WebGUI
-      - ${LIDARR_GUI_PORT:-8686}:8686 ## Lidarr WebGUI
-      - ${READARR_GUI_PORT:-8787}:8787 ## Readarr WebGUI
-      - ${LIBRARIAN_GUI_PORT:-5299}:5299 ## Lazylibrarian WebGUI
-      - ${CALIBRE_DESKTOP_PORT:-8080}:8080 ## calibre
-      - ${CALIBRE_GUI_PORT:-8081}:8081 ## calibre
-      - ${CALIBRE_WEB_GUI_PORT:-8083}:8083 ## calibre-web
-      - ${JELLYFIN_PORT:-8096}:8096 ## Jellyfin http WebGUI
-      - ${JELLYFIN_GUI_PORT:-8920}:8920 ## Optional Jellyfin https WebGUI
-      - ${JELLYFIN_DISCO_PORT:-7359}:7359/udp ## Optional Jellyfin discoverable
+      - ${BAZARR_PORT:-6767}:6767
+      - ${CALIBRE_DESKTOP_PORT:-8080}:8080
+      - ${CALIBRE_GUI_PORT:-8081}:8081
+      - ${CALIBRE_WEB_GUI_PORT:-8083}:8083
+      - ${JELLYFIN_DISCO_PORT:-7359}:7359/udp
       # - ${JELLYFIN_DLNA_PORT:-1900}:1900/udp ## Optional Jellyfin DNLA
+      - ${JELLYFIN_GUI_PORT:-8920}:8920
+      - ${JELLYFIN_PORT:-8096}:8096
+      - ${LIBRARIAN_GUI_PORT:-5299}:5299
+      - ${LIDARR_GUI_PORT:-8686}:8686
+      - ${PROWLARR_GUI_PORT:-9696}:9696
+      - ${RADARR_GUI_PORT:-7878}:7878
+      - ${READARR_GUI_PORT:-8787}:8787
+      - ${SONARR_GUI_PORT:-8989}:8989
+      - ${TDARR_EXTRA_NODE_PORT:-8268}:8268
+      - ${TDARR_GUI_PORT:-8265}:8265
+      - ${TDARR_NODE_PORT:-8267}:8267
+      - ${TDARR_SERVER_PORT:-8266}:8266
+      - ${TRANSMISSION_GUI_PORT:-9091}:9091
     restart: unless-stopped
 
   tdarr:
@@ -76,11 +77,6 @@ services:
     network_mode: "service:transmission-openvpn"
     depends_on:
       - transmission-openvpn # for vpn internet access
-    # ports: ## Not needed because we are going through service:transmission-openvpn 
-      # - 8265:8265 # webUI port
-      # - 8266:8266 # server port
-      # - 8267:8267 # Internal node port
-      # - 8268:8268 # Example extra node port
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -90,10 +86,6 @@ services:
       - serverPort=8266
       - webUIPort=8265
       - internalNode=true
-      ## Not using distributed notes, so not needed
-      # - nodeID=MyInternalNode
-      # - nodeIP=0.0.0.0
-      # - nodePort=8267
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${PVR_PATH}/tdarr/server:/app/server:Z
@@ -105,6 +97,7 @@ services:
       - ${TV_PATH}:/home/Tdarr/Media/TVShows:z
       - ${BJJ_PATH}:/home/Tdarr/Media/BJJ:z
     restart: unless-stopped
+    # Ports go through transmission vpn container
 
   prowlarr:
     ## https://github.com/linuxserver/docker-prowlarr/releases
@@ -122,6 +115,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${PVR_PATH}/prowlarr:/config:Z
     restart: unless-stopped
+    # Ports go through transmission vpn container
 
   radarr:
     ## https://github.com/linuxserver/docker-radarr/releases
@@ -142,6 +136,7 @@ services:
       - ${MOVIES_PATH}:/movies:z
       - ${DOWNLOADS_PATH}:/downloads:z
     restart: unless-stopped
+    # Ports go through transmission vpn container
  
   sonarr:
     ## https://github.com/linuxserver/docker-sonarr/releases 
@@ -162,6 +157,7 @@ services:
       - ${TV_PATH}:/tv:z
       - ${DOWNLOADS_PATH}:/downloads:z
     restart: unless-stopped
+    # Ports go through transmission vpn container
  
   lidarr:
     ## https://github.com/linuxserver/docker-lidarr/releases
@@ -183,6 +179,27 @@ services:
       - ${MUSIC_PATH}:/music:z
       - ${DOWNLOADS_PATH}:/downloads:z
     restart: unless-stopped
+    # Ports go through transmission vpn container
+
+  bazarr:
+    ## https://github.com/linuxserver/docker-bazarr/releases
+    image: lscr.io/linuxserver/bazarr:${BAZARR_VERSION:-latest}
+    network_mode: "service:transmission-openvpn"
+    depends_on:
+      - transmission-openvpn # for vpn internet access
+    container_name: pvr_bazarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK=${UMASK}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${PVR_PATH}/bazarr:/config:Z
+      - ${MUSIC_PATH}:/music:z
+      - ${DOWNLOADS_PATH}:/downloads:z
+    restart: unless-stopped
+    # Ports go through transmission vpn container
 
   jellyfin:
     ## https://github.com/linuxserver/docker-jellyfin/releases
@@ -205,13 +222,8 @@ services:
       - ${TV_PATH}:/data/tv:z
       - ${MUSIC_PATH}:/data/music:z
       - ${BJJ_PATH}:/data/bjj:z
-    # Ports go through transmission vpn container
-    # ports:
-    #   - 8096:8096
-    #   - 8920:8920 #optional
-    #   - 7359:7359/udp #optional
-    #   - 1900:1900/udp #optional
     restart: unless-stopped
+    # Ports go through transmission vpn container
 
   # lazylibrarian:
   #   # https://github.com/linuxserver/docker-lazylibrarian/releases
