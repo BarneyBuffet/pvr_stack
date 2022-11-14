@@ -69,6 +69,8 @@ services:
       - ${TDARR_SERVER_PORT:-8266}:8266
       - ${TRANSMISSION_GUI_PORT:-9091}:9091
     restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
 
   tdarr:
     ## https://github.com/users/haveagitgat/packages/container/package/tdarr 
@@ -98,6 +100,8 @@ services:
       - ${BJJ_PATH}:/home/Tdarr/Media/BJJ:z
     restart: unless-stopped
     # Ports go through transmission vpn container
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
 
   prowlarr:
     ## https://github.com/linuxserver/docker-prowlarr/releases
@@ -116,6 +120,8 @@ services:
       - ${PVR_PATH}/prowlarr:/config:Z
     restart: unless-stopped
     # Ports go through transmission vpn container
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
 
   radarr:
     ## https://github.com/linuxserver/docker-radarr/releases
@@ -137,6 +143,8 @@ services:
       - ${DOWNLOADS_PATH}:/downloads:z
     restart: unless-stopped
     # Ports go through transmission vpn container
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
  
   sonarr:
     ## https://github.com/linuxserver/docker-sonarr/releases 
@@ -158,6 +166,8 @@ services:
       - ${DOWNLOADS_PATH}:/downloads:z
     restart: unless-stopped
     # Ports go through transmission vpn container
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
  
   lidarr:
     ## https://github.com/linuxserver/docker-lidarr/releases
@@ -180,6 +190,8 @@ services:
       - ${DOWNLOADS_PATH}:/downloads:z
     restart: unless-stopped
     # Ports go through transmission vpn container
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
 
   bazarr:
     ## https://github.com/linuxserver/docker-bazarr/releases
@@ -200,6 +212,8 @@ services:
       - ${TV_PATH}:/tv:z
     restart: unless-stopped
     # Ports go through transmission vpn container
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
 
   jellyfin:
     ## https://github.com/linuxserver/docker-jellyfin/releases
@@ -224,6 +238,8 @@ services:
       - ${BJJ_PATH}:/data/bjj:z
     restart: unless-stopped
     # Ports go through transmission vpn container
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
 
   # lazylibrarian:
   #   # https://github.com/linuxserver/docker-lazylibrarian/releases
