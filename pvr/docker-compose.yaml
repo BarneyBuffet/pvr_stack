@@ -6,7 +6,7 @@ services:
     # https://github.com/cloudflare/cloudflared/releases
     image: cloudflare/cloudflared:${CLOUDFLARED_VERSION:-latest}
     container_name: pvr_cloudflared_tunnel
-    network_mode: "service:transmission-openvpn"
+    network_mode: "service:transmission-openvpn" # Cloudflared services will be http://localhost:port due to network mode forcing traffic through transmission container
     command: tunnel run
     environment:
       - TUNNEL_TOKEN=${CLOUDFLARED_TUNNEL_TOKEN}
@@ -61,25 +61,25 @@ services:
       options:
         max-size: 10m
     ports:
+      - ${TRANSMISSION_GUI_PORT:-9091}:9091
+      - ${PROWLARR_GUI_PORT:-9696}:9696
+      - ${RADARR_GUI_PORT:-7878}:7878
+      - ${SONARR_GUI_PORT:-8989}:8989
+      - ${LIDARR_GUI_PORT:-8686}:8686
       - ${BAZARR_PORT:-6767}:6767
-      - ${CALIBRE_DESKTOP_PORT:-8080}:8080
-      - ${CALIBRE_GUI_PORT:-8081}:8081
-      - ${CALIBRE_WEB_GUI_PORT:-8083}:8083
       - ${JELLYFIN_DISCO_PORT:-7359}:7359/udp
       # - ${JELLYFIN_DLNA_PORT:-1900}:1900/udp ## Optional Jellyfin DNLA
       - ${JELLYFIN_GUI_PORT:-8920}:8920
       - ${JELLYFIN_PORT:-8096}:8096
-      - ${LIBRARIAN_GUI_PORT:-5299}:5299
-      - ${LIDARR_GUI_PORT:-8686}:8686
-      - ${PROWLARR_GUI_PORT:-9696}:9696
-      - ${RADARR_GUI_PORT:-7878}:7878
-      - ${READARR_GUI_PORT:-8787}:8787
-      - ${SONARR_GUI_PORT:-8989}:8989
       - ${TDARR_EXTRA_NODE_PORT:-8268}:8268
       - ${TDARR_GUI_PORT:-8265}:8265
       - ${TDARR_NODE_PORT:-8267}:8267
+      - ${LIBRARIAN_GUI_PORT:-5299}:5299
+      - ${READARR_GUI_PORT:-8787}:8787
       - ${TDARR_SERVER_PORT:-8266}:8266
-      - ${TRANSMISSION_GUI_PORT:-9091}:9091
+      - ${CALIBRE_DESKTOP_PORT:-8080}:8080
+      - ${CALIBRE_GUI_PORT:-8081}:8081
+      - ${CALIBRE_WEB_GUI_PORT:-8083}:8083
     restart: unless-stopped
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
@@ -221,6 +221,38 @@ services:
     # Ports go through transmission vpn container
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
+
+  tdarr:
+    ## https://github.com/users/haveagitgat/packages/container/package/tdarr 
+    image: ghcr.io/haveagitgat/tdarr:${TDARR_VERSION:-latest}
+    container_name: pvr_tdarr
+    network_mode: "service:transmission-openvpn"
+    depends_on:
+      - transmission-openvpn # for vpn internet access
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK_SET=${UMASK}
+      - serverIP=0.0.0.0
+      - serverPort=8266
+      - webUIPort=8265
+      - internalNode=true
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${PVR_PATH}/tdarr/server:/app/server:Z
+      - ${PVR_PATH}/tdarr/configs:/app/configs:Z
+      - ${PVR_PATH}/tdarr/logs:/app/logs:Z
+      - ${PVR_PATH}/tdarr/media:/media:Z
+      - ${PVR_PATH}/tdarr/transcode_cache:/temp:Z
+      - ${MOVIES_PATH}:/home/Tdarr/Media/Movies:z
+      - ${TV_PATH}:/home/Tdarr/Media/TVShows:z
+      - ${BJJ_PATH}:/home/Tdarr/Media/BJJ:z
+    restart: unless-stopped
+    # Ports go through transmission vpn container
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
 
   # lazylibrarian:
   #   # https://github.com/linuxserver/docker-lazylibrarian/releases
