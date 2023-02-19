@@ -1,6 +1,11 @@
 ## https://www.youtube.com/watch?v=5rtGBwBuzQE
 version: '3'
 
+networks:
+  default:
+    name: pvr_network
+    driver: bridge
+
 services:
   cloudflared:
     # https://github.com/cloudflare/cloudflared/releases
