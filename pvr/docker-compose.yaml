@@ -41,8 +41,8 @@ services:
       - TRANSMISSION_INCOMPLETE_DIR=/data/downloads/#incomplete
       - TRANSMISSION_WATCH_DIR=/data/downloads/#watch
       - TRANSMISSION_RPC_AUTHENTICATION_REQUIRED=true
-      - TRANSMISSION_RPC_USERNAME=${TRANSMISSION_RPC_USERNAME}
-      - TRANSMISSION_RPC_PASSWORD=${TRANSMISSION_RPC_PASSWORD}
+      # - TRANSMISSION_RPC_USERNAME=${TRANSMISSION_RPC_USERNAME} # do not need it with tunnel and SSO
+      # - TRANSMISSION_RPC_PASSWORD=${TRANSMISSION_RPC_PASSWORD} # do not need it with tunnel and SSO
       - TRANSMISSION_DOWNLOAD_QUEUE_SIZE=4
       - TRANSMISSION_WEB_UI=transmission-web-control
       - TRANSMISSION_ALT_SPEED_DOWN=1000
@@ -67,10 +67,10 @@ services:
       - ${SONARR_GUI_PORT:-8989}:8989
       - ${LIDARR_GUI_PORT:-8686}:8686
       - ${BAZARR_PORT:-6767}:6767
-      - ${JELLYFIN_DISCO_PORT:-7359}:7359/udp
+      # - ${JELLYFIN_DISCO_PORT:-7359}:7359/udp
       # - ${JELLYFIN_DLNA_PORT:-1900}:1900/udp ## Optional Jellyfin DNLA
-      - ${JELLYFIN_GUI_PORT:-8920}:8920
-      - ${JELLYFIN_PORT:-8096}:8096
+      # - ${JELLYFIN_GUI_PORT:-8920}:8920
+      # - ${JELLYFIN_PORT:-8096}:8096
       - ${TDARR_EXTRA_NODE_PORT:-8268}:8268
       - ${TDARR_GUI_PORT:-8265}:8265
       - ${TDARR_NODE_PORT:-8267}:8267
@@ -252,7 +252,6 @@ services:
     # Ports go through transmission vpn container
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
-
 
   # lazylibrarian:
   #   # https://github.com/linuxserver/docker-lazylibrarian/releases
