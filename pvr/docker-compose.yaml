@@ -62,18 +62,18 @@ services:
       options:
         max-size: 10m
     ports:
-      - ${TRANSMISSION_GUI_PORT:-9091}:9091
-      - ${PROWLARR_GUI_PORT:-9696}:9696
-      - ${RADARR_GUI_PORT:-7878}:7878
-      - ${SONARR_GUI_PORT:-8989}:8989
-      - ${LIDARR_GUI_PORT:-8686}:8686
-      - ${BAZARR_PORT:-6767}:6767
+      # - ${TRANSMISSION_GUI_PORT:-9091}:9091
+      # - ${PROWLARR_GUI_PORT:-9696}:9696
+      # - ${RADARR_GUI_PORT:-7878}:7878
+      # - ${SONARR_GUI_PORT:-8989}:8989
+      # - ${LIDARR_GUI_PORT:-8686}:8686
+      # - ${BAZARR_PORT:-6767}:6767
       # - ${JELLYFIN_DISCO_PORT:-7359}:7359/udp
       # - ${JELLYFIN_DLNA_PORT:-1900}:1900/udp ## Optional Jellyfin DNLA
       # - ${JELLYFIN_GUI_PORT:-8920}:8920
       # - ${JELLYFIN_PORT:-8096}:8096
-      - ${TDARR_EXTRA_NODE_PORT:-8268}:8268
-      - ${TDARR_GUI_PORT:-8265}:8265
+      # - ${TDARR_EXTRA_NODE_PORT:-8268}:8268
+      # - ${TDARR_GUI_PORT:-8265}:8265
       - ${TDARR_NODE_PORT:-8267}:8267
       - ${TDARR_SERVER_PORT:-8266}:8266
       # - ${LIBRARIAN_GUI_PORT:-5299}:5299
