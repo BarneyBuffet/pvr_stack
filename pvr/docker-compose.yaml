@@ -54,6 +54,7 @@ services:
       - TRANSMISSION_ALT_SPEED_UP=2
       - TRANSMISSION_PEER_PORT=47444
       - DNS=9.9.9.9,149.112.112.112
+      - DISABLE_PORT_UPDATER=true
     cap_add:
       - NET_ADMIN
     logging:
