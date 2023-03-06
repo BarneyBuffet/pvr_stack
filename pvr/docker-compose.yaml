@@ -11,7 +11,11 @@ services:
     # https://github.com/cloudflare/cloudflared/releases
     image: cloudflare/cloudflared:${CLOUDFLARED_VERSION:-latest}
     container_name: pvr_cloudflared_tunnel
-    network_mode: "service:transmission-openvpn" # Cloudflared services will be http://localhost:port due to network mode forcing traffic through transmission container
+    depends_on:
+      # for vpn internet access
+      - transmission_openvpn
+    # Cloudflared services will be http://localhost:port due to network mode forcing traffic through transmission container
+    network_mode: "service:transmission_openvpn"
     command: tunnel run
     environment:
       - TUNNEL_TOKEN=${CLOUDFLARED_TUNNEL_TOKEN}
@@ -19,8 +23,28 @@ services:
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
 
+  heimdall:
+    image: lscr.io/linuxserver/heimdall:${HEIMDALL_VERSION:-latest}
+    container_name: pvr_heimdall
+    depends_on:
+      # for vpn internet access
+      - transmission_openvpn
+    # Cloudflared services will be http://localhost:port due to network mode forcing traffic through transmission container
+    network_mode: "service:transmission_openvpn"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${PVR_PATH}/heimdall:/config
+    # ports: # Not needed because we are going to use the tunnel
+    #   - 11443:443
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
   ## https://haugene.github.io/docker-transmission-openvpn/
-  transmission-openvpn:
+  transmission_openvpn:
     ## https://github.com/haugene/docker-transmission-openvpn/releases
     image: haugene/transmission-openvpn:${TRANSMISSION_VERSION:-latest}
     container_name: pvr_transmission
@@ -86,6 +110,7 @@ services:
       # - ${CALIBRE_DESKTOP_PORT:-8080}:8080
       # - ${CALIBRE_GUI_PORT:-8081}:8081
       # - ${CALIBRE_WEB_GUI_PORT:-8083}:8083
+      # - ${HEIMDALL_PORT:-443}:443
     restart: unless-stopped
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
@@ -93,9 +118,13 @@ services:
   prowlarr:
     ## https://github.com/linuxserver/docker-prowlarr/releases
     image: lscr.io/linuxserver/prowlarr:${PROWLARR_VERSION:-develop}
-    network_mode: "service:transmission-openvpn"
+    # Cloudflared services will be http://localhost:port due to network mode forcing traffic through transmission container
+    network_mode: "service:transmission_openvpn"
     depends_on:
-      - transmission-openvpn # for vpn internet access
+      # for vpn internet access
+      - transmission_openvpn
+      # for reverse proxy
+      - cloudflared
     container_name: pvr_prowlarr
     environment:
       - PUID=${PUID}
@@ -113,9 +142,14 @@ services:
   radarr:
     ## https://github.com/linuxserver/docker-radarr/releases
     image: lscr.io/linuxserver/radarr:${RADARR_VERSION:-latest}
-    network_mode: "service:transmission-openvpn"
+    # Cloudflared services will be http://localhost:port due to network mode forcing traffic through transmission container
+    network_mode: "service:transmission_openvpn"
     depends_on:
-      - transmission-openvpn # for vpn internet access
+      # for vpn internet access
+      - transmission_openvpn
+      # for reverse proxy
+      - cloudflared
+      # for indexing
       - prowlarr
     container_name: pvr_radarr
     environment:
@@ -136,9 +170,14 @@ services:
   sonarr:
     ## https://github.com/linuxserver/docker-sonarr/releases 
     image: lscr.io/linuxserver/sonarr:${SONARR_VERSION:-latest}
-    network_mode: "service:transmission-openvpn"
+    # Cloudflared services will be http://localhost:port due to network mode forcing traffic through transmission container
+    network_mode: "service:transmission_openvpn"
     depends_on:
-      - transmission-openvpn # for vpn internet access
+      # for vpn internet access
+      - transmission_openvpn
+      # for reverse proxy
+      - cloudflared
+      # for indexing
       - prowlarr
     container_name: pvr_sonarr
     environment:
@@ -159,9 +198,14 @@ services:
   lidarr:
     ## https://github.com/linuxserver/docker-lidarr/releases
     image: lscr.io/linuxserver/lidarr:${LIDARR_VERSION:-latest}
-    network_mode: "service:transmission-openvpn"
+    # Cloudflared services will be http://localhost:port due to network mode forcing traffic through transmission container
+    network_mode: "service:transmission_openvpn"
     depends_on:
-      - transmission-openvpn # for vpn internet access
+      # for vpn internet access
+      - transmission_openvpn
+      # for reverse proxy
+      - cloudflared
+      # for indexing
       - prowlarr
     container_name: pvr_lidarr
     environment:
@@ -183,9 +227,13 @@ services:
   bazarr:
     ## https://github.com/linuxserver/docker-bazarr/releases
     image: lscr.io/linuxserver/bazarr:${BAZARR_VERSION:-latest}
-    network_mode: "service:transmission-openvpn"
+    # Cloudflared services will be http://localhost:port due to network mode forcing traffic through transmission container
+    network_mode: "service:transmission_openvpn"
     depends_on:
-      - transmission-openvpn # for vpn internet access
+      # for vpn internet access
+      - transmission_openvpn
+      # for reverse proxy
+      - cloudflared
     container_name: pvr_bazarr
     environment:
       - PUID=${PUID}
@@ -206,9 +254,13 @@ services:
     ## https://github.com/linuxserver/docker-jellyfin/releases
     image: lscr.io/linuxserver/jellyfin:${JELLYFIN_VERSION:-latest}
     container_name: pvr_jellyfin
-    network_mode: "service:transmission-openvpn"
+    # Cloudflared services will be http://localhost:port due to network mode forcing traffic through transmission container
+    network_mode: "service:transmission_openvpn"
     depends_on:
-      - transmission-openvpn # for vpn internet access
+      # for vpn internet access
+      - transmission_openvpn
+      # for reverse proxy
+      - cloudflared
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -232,9 +284,13 @@ services:
     ## https://github.com/users/haveagitgat/packages/container/package/tdarr 
     image: ghcr.io/haveagitgat/tdarr:${TDARR_VERSION:-latest}
     container_name: pvr_tdarr
-    network_mode: "service:transmission-openvpn"
+    # Cloudflared services will be http://localhost:port due to network mode forcing traffic through transmission container
+    network_mode: "service:transmission_openvpn"
     depends_on:
-      - transmission-openvpn # for vpn internet access
+      # for vpn internet access
+      - transmission_openvpn
+      # for reverse proxy
+      - cloudflared
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -263,7 +319,7 @@ services:
   #   # https://github.com/linuxserver/docker-lazylibrarian/releases
   #   image: lscr.io/linuxserver/lazylibrarian:${LAZYLIBRIAN_VERSION:-latest}
   #   container_name: pvr_lazylibrarian
-  #   network_mode: "service:transmission-openvpn"
+  #   network_mode: "service:transmission_openvpn"
   #   depends_on:
   #     - pvr_transmission  # for vpn internet access
   #   environment:
@@ -291,7 +347,7 @@ services:
 
   # plex:
   #     image: linuxserver/plex
-  #     network_mode: "service:transmission-openvpn"
+  #     network_mode: "service:transmission_openvpn"
   #     container_name: plex
   #     volumes:
   #         - /media/${USER}/Data/appdata/plex:/config
@@ -306,7 +362,7 @@ services:
   #   # https://github.com/linuxserver/docker-calibre/releases
   #   image: lscr.io/linuxserver/calibre:${CALIBRE_VERSION:-latest}
   #   container_name: pvr_calibre
-  #   network_mode: "service:transmission-openvpn"
+  #   network_mode: "service:transmission_openvpn"
   #   depends_on:
   #     - pvr_transmission  # for vpn internet access
   #   restart: unless-stopped
@@ -336,7 +392,7 @@ services:
   #   # https://github.com/linuxserver/docker-calibre-web/releases
   #   image: lscr.io/linuxserver/calibre-web:${CALIBRE_WEB_VERSION:-latest}
   #   container_name: pvr_calibre_web
-  #   network_mode: "service:transmission-openvpn"
+  #   network_mode: "service:transmission_openvpn"
   #   depends_on:
   #     - pvr_transmission  # for vpn internet access
   #   restart: unless-stopped
@@ -363,7 +419,7 @@ services:
   # readarr:
   #   ## https://github.com/linuxserver/docker-readarr/releases
   #   image: lscr.io/linuxserver/readarr:${READARR_VERSION:-develop}
-  #   network_mode: "service:transmission-openvpn"
+  #   network_mode: "service:transmission_openvpn"
   #   container_name: pvr_readarr
   #   depends_on:
   #     - pvr_transmission  # for vpn internet access
