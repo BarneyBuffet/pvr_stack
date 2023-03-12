@@ -110,7 +110,7 @@ services:
       # - ${CALIBRE_DESKTOP_PORT:-8080}:8080
       # - ${CALIBRE_GUI_PORT:-8081}:8081
       # - ${CALIBRE_WEB_GUI_PORT:-8083}:8083
-      # - ${HEIMDALL_PORT:-443}:443
+      - ${HEIMDALL_PORT:-11443}:443
     restart: unless-stopped
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
