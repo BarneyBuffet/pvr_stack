@@ -310,6 +310,7 @@ services:
       - ${MOVIES_PATH}:/home/Tdarr/Media/Movies:z
       - ${TV_PATH}:/home/Tdarr/Media/TVShows:z
       - ${BJJ_PATH}:/home/Tdarr/Media/BJJ:z
+      - ${MUSIC_PATH}:/home/Tdarr/Media/Music:z
     restart: unless-stopped
     # Ports go through transmission vpn container
     labels:
