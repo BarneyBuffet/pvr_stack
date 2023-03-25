@@ -316,6 +316,34 @@ services:
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
 
+  readarr_audiobooks:
+    ## https://github.com/linuxserver/docker-readarr/releases
+    image: lscr.io/linuxserver/readarr:${READARR_VERSION:-develop}
+      # Cloudflared services will be http://localhost:port due to network mode forcing traffic through transmission container
+    network_mode: "service:transmission_openvpn"
+    container_name: pvr_readarr_audiobooks
+    depends_on:
+      # for vpn internet access
+      - transmission_openvpn
+      # for reverse proxy
+      - cloudflared
+      # for indexing
+      - prowlarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK=${UMASK}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${PVR_PATH}/readarr_audiobooks:/config:Z
+      - ${AUDIOBOOKS_PATH}:/audiobooks:z
+      - ${DOWNLOADS_PATH}:/downloads:z
+    # Ports go through transmission vpn container
+    # ports:
+    #   - 8787:8787
+    restart: unless-stopped
+
   # lazylibrarian:
   #   # https://github.com/linuxserver/docker-lazylibrarian/releases
   #   image: lscr.io/linuxserver/lazylibrarian:${LAZYLIBRIAN_VERSION:-latest}
