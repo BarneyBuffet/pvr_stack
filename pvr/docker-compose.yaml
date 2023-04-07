@@ -213,7 +213,7 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
       - UMASK=${UMASK}
-      - DOCKER_MODS=lscr.io/linuxserver/mods:lidarr-flac2mp3 #optional
+      - DOCKER_MODS=linuxserver/mods:lidarr-flac2mp3 #optional
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${PVR_PATH}/lidarr:/config:Z
