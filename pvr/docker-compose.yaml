@@ -251,36 +251,6 @@ services:
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
 
-  jellyfin:
-    ## https://github.com/linuxserver/docker-jellyfin/releases
-    image: lscr.io/linuxserver/jellyfin:${JELLYFIN_VERSION:-latest}
-    container_name: pvr_jellyfin
-    # Cloudflared services will be http://localhost:port due to network mode forcing traffic through transmission container
-    network_mode: "service:transmission_openvpn"
-    depends_on:
-      # for vpn internet access
-      - transmission_openvpn
-      # for reverse proxy
-      - cloudflared
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - UMASK=${UMASK}
-      - DOCKER_MODS=linuxserver/mods:jellyfin-opencl-intel #optional
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${PVR_PATH}/jellyfin:/config:Z
-      - ${AUDIOBOOKS_PATH}:/data/audiobooks:z
-      - ${MOVIES_PATH}:/data/movies:z
-      - ${TV_PATH}:/data/tv:z
-      - ${MUSIC_PATH}:/data/music:z
-      - ${BJJ_PATH}:/data/bjj:z
-    restart: unless-stopped
-    # Ports go through transmission vpn container
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
-
   tdarr:
     ## https://github.com/users/haveagitgat/packages/container/package/tdarr 
     image: ghcr.io/haveagitgat/tdarr:${TDARR_VERSION:-latest}
@@ -374,6 +344,36 @@ services:
     # ports:
     #   - 5299:5299
     restart: unless-stopped
+
+  # jellyfin:
+  #   ## https://github.com/linuxserver/docker-jellyfin/releases
+  #   image: lscr.io/linuxserver/jellyfin:${JELLYFIN_VERSION:-latest}
+  #   container_name: pvr_jellyfin
+  #   # Cloudflared services will be http://localhost:port due to network mode forcing traffic through transmission container
+  #   network_mode: "service:transmission_openvpn"
+  #   depends_on:
+  #     # for vpn internet access
+  #     - transmission_openvpn
+  #     # for reverse proxy
+  #     - cloudflared
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=${TZ}
+  #     - UMASK=${UMASK}
+  #     - DOCKER_MODS=linuxserver/mods:jellyfin-opencl-intel #optional
+  #   volumes:
+  #     - /etc/localtime:/etc/localtime:ro
+  #     - ${PVR_PATH}/jellyfin:/config:Z
+  #     - ${AUDIOBOOKS_PATH}:/data/audiobooks:z
+  #     - ${MOVIES_PATH}:/data/movies:z
+  #     - ${TV_PATH}:/data/tv:z
+  #     - ${MUSIC_PATH}:/data/music:z
+  #     - ${BJJ_PATH}:/data/bjj:z
+  #   restart: unless-stopped
+  #   # Ports go through transmission vpn container
+  #   labels:
+  #     - "com.centurylinklabs.watchtower.enable=true"
 
   # plex:
   #     image: linuxserver/plex
