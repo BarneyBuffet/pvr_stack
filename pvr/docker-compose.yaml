@@ -92,12 +92,12 @@ services:
       options:
         max-size: 10m
     ports:
-      # - ${TRANSMISSION_GUI_PORT:-9091}:9091
+      - ${TRANSMISSION_GUI_PORT:-9091}:9091
       # - ${PROWLARR_GUI_PORT:-9696}:9696
-      # - ${RADARR_GUI_PORT:-7878}:7878
-      # - ${SONARR_GUI_PORT:-8989}:8989
-      # - ${LIDARR_GUI_PORT:-8686}:8686
-      # - ${BAZARR_PORT:-6767}:6767
+      - ${RADARR_GUI_PORT:-7878}:7878
+      - ${SONARR_GUI_PORT:-8989}:8989
+      - ${LIDARR_GUI_PORT:-8686}:8686
+      - ${BAZARR_PORT:-6767}:6767
       # - ${JELLYFIN_DISCO_PORT:-7359}:7359/udp
       # - ${JELLYFIN_DLNA_PORT:-1900}:1900/udp ## Optional Jellyfin DNLA
       # - ${JELLYFIN_GUI_PORT:-8920}:8920
@@ -107,7 +107,7 @@ services:
       - ${TDARR_NODE_PORT:-8267}:8267
       - ${TDARR_SERVER_PORT:-8266}:8266
       # - ${LIBRARIAN_GUI_PORT:-5299}:5299
-      # - ${READARR_GUI_PORT:-8787}:8787
+      - ${READARR_GUI_PORT:-8787}:8787
       # - ${CALIBRE_DESKTOP_PORT:-8080}:8080
       # - ${CALIBRE_GUI_PORT:-8081}:8081
       # - ${CALIBRE_WEB_GUI_PORT:-8083}:8083
@@ -251,41 +251,41 @@ services:
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
 
-  tdarr:
-    ## https://github.com/users/haveagitgat/packages/container/package/tdarr 
-    image: ghcr.io/haveagitgat/tdarr:${TDARR_VERSION:-latest}
-    container_name: pvr_tdarr
-    # Cloudflared services will be http://localhost:port due to network mode forcing traffic through transmission container
-    network_mode: "service:transmission_openvpn"
-    depends_on:
-      # for vpn internet access
-      - transmission_openvpn
-      # for reverse proxy
-      - cloudflared
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - UMASK_SET=${UMASK}
-      - serverIP=0.0.0.0
-      - serverPort=8266
-      - webUIPort=8265
-      - internalNode=true
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${PVR_PATH}/tdarr/server:/app/server:Z
-      - ${PVR_PATH}/tdarr/configs:/app/configs:Z
-      - ${PVR_PATH}/tdarr/logs:/app/logs:Z
-      - ${PVR_PATH}/tdarr/media:/media:Z
-      - ${PVR_PATH}/tdarr/transcode_cache:/temp:Z
-      - ${MOVIES_PATH}:/home/Tdarr/Media/Movies:z
-      - ${TV_PATH}:/home/Tdarr/Media/TVShows:z
-      - ${BJJ_PATH}:/home/Tdarr/Media/BJJ:z
-      - ${MUSIC_PATH}:/home/Tdarr/Media/Music:z
-    restart: unless-stopped
-    # Ports go through transmission vpn container
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
+  # tdarr:
+  #   ## https://github.com/users/haveagitgat/packages/container/package/tdarr 
+  #   image: ghcr.io/haveagitgat/tdarr:${TDARR_VERSION:-latest}
+  #   container_name: pvr_tdarr
+  #   # Cloudflared services will be http://localhost:port due to network mode forcing traffic through transmission container
+  #   network_mode: "service:transmission_openvpn"
+  #   depends_on:
+  #     # for vpn internet access
+  #     - transmission_openvpn
+  #     # for reverse proxy
+  #     - cloudflared
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=${TZ}
+  #     - UMASK_SET=${UMASK}
+  #     - serverIP=0.0.0.0
+  #     - serverPort=8266
+  #     - webUIPort=8265
+  #     - internalNode=true
+  #   volumes:
+  #     - /etc/localtime:/etc/localtime:ro
+  #     - ${PVR_PATH}/tdarr/server:/app/server:Z
+  #     - ${PVR_PATH}/tdarr/configs:/app/configs:Z
+  #     - ${PVR_PATH}/tdarr/logs:/app/logs:Z
+  #     - ${PVR_PATH}/tdarr/media:/media:Z
+  #     - ${PVR_PATH}/tdarr/transcode_cache:/temp:Z
+  #     - ${MOVIES_PATH}:/home/Tdarr/Media/Movies:z
+  #     - ${TV_PATH}:/home/Tdarr/Media/TVShows:z
+  #     - ${BJJ_PATH}:/home/Tdarr/Media/BJJ:z
+  #     - ${MUSIC_PATH}:/home/Tdarr/Media/Music:z
+  #   restart: unless-stopped
+  #   # Ports go through transmission vpn container
+  #   labels:
+  #     - "com.centurylinklabs.watchtower.enable=true"
 
   readarr_audiobooks:
     ## https://github.com/linuxserver/docker-readarr/releases
