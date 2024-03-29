@@ -1,9 +1,6 @@
-################################################################################
-# OPENVPN AND TRANSMISSION WITH WEBUI
+# TRANSMISSION OVER OPENVPN
 # https://github.com/haugene/docker-transmission-openvpn
 ---
-version: '3'
-
 networks:
   default:
     name: transmission_network

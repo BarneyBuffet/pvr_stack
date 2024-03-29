@@ -1,0 +1,28 @@
+## # DOCKGE
+##
+## A fancy, easy-to-use and reactive self-hosted docker compose.yaml 
+## stack-oriented manager.
+## https://github.com/louislam/dockge
+---
+networks:
+  default:
+    name: transmission_network
+    external: true
+
+services:
+  dockge:
+    image: louislam/dockge:${DOCKGE_VERSION:-latest}
+    container_name: dockge
+    restart: unless-stopped
+    ports:
+      - '5001:5001'
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${STACKS_PATH:-/opt/docker_stacks}:/opt/stacks
+      - ${DOCKGE_PATH:-~/Docker/dockge}/data:/app/data
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.dockge.rule=Pathprefix(`/dockge`)'
+      - 'traefik.http.services.dockge.loadbalancer.server.port=5001'
+      - 'com.centurylinklabs.watchtower.enable=true'
