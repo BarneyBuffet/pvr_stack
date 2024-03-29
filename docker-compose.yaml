@@ -1,0 +1,340 @@
+## PVR DOCKER COMPOSE FILE
+---
+networks:
+  default:
+    name: transmission_network
+    driver: bridge
+  plex_network:
+    driver: bridge
+
+services:
+
+  cloudflared:
+    # https://github.com/cloudflare/cloudflared/releases
+    image: cloudflare/cloudflared:${CLOUDFLARED_VERSION:-latest}
+    container_name: cloudflared
+    depends_on:
+      - transmission_openvpn
+    network_mode: "service:transmission_openvpn"
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARED_TUNNEL_TOKEN}
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  # TRANSMISSION OVER OPENVPN
+  # https://github.com/haugene/docker-transmission-openvpn
+  transmission_openvpn:
+    ## https://github.com/haugene/docker-transmission-openvpn/releases
+    image: haugene/transmission-openvpn:${TRANSMISSION_VERSION:-latest}
+    container_name: transmission_openvpn
+    restart: unless-stopped
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - '9091:9091' # Transmission
+      - '9696:9696' # Prowlarr
+      - '8088:443' # Heimdall
+      - '8989:8989' # Sonarr
+      - '7878:7878' # Radarr
+      - '8686:8686' # Lidarr
+      - '6767:6767' # Bazarr
+      - '5055:5055' # Overseerr
+      - '13378:80' # Audiobookshelf
+      - '8787:8787' # Readarr
+    volumes:
+      - '${TRANSMISSION_PATH:-~/Docker/transmission}:/config:Z'
+      - '${DOWNLOADS_PATH:-~/Downloads}:/data:Z'
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - CREATE_TUN_DEVICE=true
+      - OPENVPN_PROVIDER=${OPENVPN_PROVIDER}
+      - OPENVPN_CONFIG=${OPENVPN_CONFIG}
+      - OPENVPN_USERNAME=${OPENVPN_USERNAME}
+      - OPENVPN_PASSWORD=${OPENVPN_PASSWORD}
+      - OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60 --dhcp-option DNS 9.9.9.9
+      - WEBPROXY_ENABLED=false
+      - LOCAL_NETWORK=${TRANSMISSION_LOCAL_NETWORK}
+      - TRANSMISSION_SCRAPE_PAUSED_TORRENTS_ENABLED=false
+      - TRANSMISSION_RPC_AUTHENTICATION_REQUIRED=true
+      - TRANSMISSION_RPC_USERNAME=${TRANSMISSION_RPC_USERNAME}
+      - TRANSMISSION_RPC_PASSWORD=${TRANSMISSION_RPC_PASSWORD}
+      - TRANSMISSION_DOWNLOAD_QUEUE_SIZE=4
+      - TRANSMISSION_WEB_UI=transmission-web-control
+      - TRANSMISSION_ALT_SPEED_DOWN=1000
+      - TRANSMISSION_ALT_SPEED_ENABLED=true
+      - TRANSMISSION_ALT_SPEED_TIME_BEGIN=300
+      - TRANSMISSION_ALT_SPEED_TIME_DAY=127
+      - TRANSMISSION_ALT_SPEED_TIME_ENABLED=true
+      - TRANSMISSION_ALT_SPEED_TIME_END=1380
+      - TRANSMISSION_ALT_SPEED_UP=2
+      - TRANSMISSION_PEER_PORT=47444
+      - DNS=9.9.9.9,149.112.112.112
+      - DISABLE_PORT_UPDATER=true
+    logging:
+      driver: json-file
+      options:
+          max-size: 10m
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+  
+  # ## PROWLARR
+  #
+  # https://prowlarr.com/
+  # Torrent indexer
+  prowlarr:
+    ## https://github.com/linuxserver/docker-prowlarr/releases
+    image: lscr.io/linuxserver/prowlarr:${PROWLARR_VERSION:-latest}
+    container_name: prowlarr
+    network_mode: "service:transmission_openvpn"
+    restart: unless-stopped
+    # Ports go through transmission vpn container
+    # ports:
+    #   - '9696:9696'
+    depends_on:
+      - transmission_openvpn
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${PROWLARR_PATH}/:/config:z
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  # ## HEIMDALL
+  #
+  # An Application dashboard and launcher
+  # https://github.com/linuxserver/Heimdall
+  heimdall:
+    image: lscr.io/linuxserver/heimdall:${HEIMDALL_VERSION:-latest}
+    container_name: heimdall
+    depends_on:
+      - transmission_openvpn
+    network_mode: "service:transmission_openvpn"
+    # ports:
+    #  - '8088:443'
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${TZ}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${HEIMDALL_PATH}:/config
+    # ports: # Not needed because we are going to use the tunnel
+    #   - 11443:443
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+  
+  # ## SONARR
+  #
+  # Smart PVR for newsgroup and bittorrent users.
+  # https://sonarr.tv/
+  # https://github.com/linuxserver/docker-sonarr
+  sonarr:
+    ## https://github.com/linuxserver/docker-sonarr/releases 
+    image: lscr.io/linuxserver/sonarr:${SONARR_VERSION:-latest}
+    container_name: sonarr
+    restart: unless-stopped
+    depends_on:
+      - transmission_openvpn
+      - prowlarr
+    network_mode: "service:transmission_openvpn"
+    # Ports go through transmission vpn container
+    # ports:
+    #   - 8989:8989
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${SONARR_PATH}:/config:z
+      - ${TV_PATH}:/tv:z
+      - ${DOWNLOADS_PATH}:/downloads:z
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+  
+  # ## RADARR
+  #
+  # Movie organizer/manager for usenet and torrent users.
+  # https://radarr.video/
+  # https://github.com/linuxserver/docker-radarr
+  radarr:
+    ## https://github.com/linuxserver/docker-radarr/releases
+    image: lscr.io/linuxserver/radarr:${RADARR_VERSION:-latest}
+    container_name: radarr
+    restart: unless-stopped
+    network_mode: "service:transmission_openvpn"
+    depends_on:
+      - transmission_openvpn
+      - prowlarr
+    # Ports go through transmission vpn container
+    # ports:
+    #   - '7878:7878'
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${RADARR_PATH}:/config:z
+      - ${MOVIES_PATH}:/movies:z
+      - ${DOWNLOADS_PATH}:/downloads:z
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+  
+  # ## LIDARR
+  #
+  # Lidarr is a music collection manager for Usenet and BitTorrent users.
+  # https://lidarr.audio/
+  # https://github.com/linuxserver/docker-lidarr
+  lidarr:
+    ## https://github.com/linuxserver/docker-lidarr/releases
+    image: lscr.io/linuxserver/lidarr:${LIDARR_VERSION:-latest}
+    container_name: lidarr
+    restart: unless-stopped
+    network_mode: "service:transmission_openvpn"
+    depends_on:
+      - transmission_openvpn
+      - prowlarr
+    # ports:
+    #   - '8686:8686'
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - DOCKER_MODS=linuxserver/mods:lidarr-flac2mp3 #optional
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${LIDARR_PATH}:/config:z
+      - ${MUSIC_PATH}:/music:z
+      - ${DOWNLOADS_PATH}:/downloads:z
+    # Ports go through transmission vpn container
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+  
+  # ## BAZARR
+  #
+  # Bazarr is a companion application to Sonarr and Radarr that manages and 
+  # downloads subtitles based on your requirements.
+  # https://www.bazarr.media/
+  # https://github.com/linuxserver/docker-bazarr
+  bazarr:
+    ## https://github.com/linuxserver/docker-bazarr/releases
+    image: lscr.io/linuxserver/bazarr:${BAZARR_VERSION:-latest}
+    container_name: bazarr
+    restart: unless-stopped
+    network_mode: "service:transmission_openvpn"
+    depends_on:
+      - transmission_openvpn
+    # Ports go through transmission vpn container
+    # ports:
+    #   - '6767:6767'
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${BAZARR_PATH}:/config:Z
+      - ${MOVIES_PATH}:/movies:z
+      - ${TV_PATH}:/tv:z
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  overseerr:
+    ## https://github.com/linuxserver/docker-bazarr/releases
+    image: lscr.io/linuxserver/overseerr:${OVERSEERR_VERSION:-latest}
+    container_name: overseerr
+    restart: unless-stopped
+    network_mode: "service:transmission_openvpn"
+    depends_on:
+      - transmission_openvpn
+    # Ports go through transmission vpn container
+    # ports:
+    #   - '5055:5055'
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${OVERSEER_PATH}:/config:Z
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+  
+  audiobookshelf:
+    ## https://github.com/advplyr/audiobookshelf/releases
+    image: ghcr.io/advplyr/audiobookshelf:${AUDIOBOOKSHELF_VERSION:-latest}
+    container_name: audiobookshelf
+    restart: unless-stopped
+    network_mode: "service:transmission_openvpn"
+    depends_on:
+      - transmission_openvpn
+    # Ports go through transmission vpn container
+    # ports:
+    #   - '0.0.0.0:13378:80'
+    environment:
+      - user=${PUID}:${PGID}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${AUDIOBOOKSHELF_PATH}:/config
+      - ${AUDIOBOOKSHELF_PATH}/metadata:/metadata
+      - ${AUDIOBOOKS_PATH}:/audiobooks
+      - ${PODCASTS_PATH}:/podcasts
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+  
+  readarr_audiobooks:
+    ## https://github.com/linuxserver/docker-readarr/releases
+    image: lscr.io/linuxserver/readarr:${READARR_VERSION:-develop}
+    container_name: readarr_audiobooks
+    network_mode: "service:transmission_openvpn"
+    # Ports go through transmission vpn container
+    # ports:
+    #   - 8787:8787
+    depends_on:
+      - transmission_openvpn
+      - prowlarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${READARR_PATH}/audiobooks:/config
+      - ${AUDIOBOOKS_PATH}:/audiobooks
+      - ${DOWNLOADS_PATH}:/downloads
+    restart: unless-stopped
+
+  # readarr_ebooks:
+  #   ## https://github.com/linuxserver/docker-readarr/releases
+  #   image: lscr.io/linuxserver/readarr:${READARR_VERSION:-develop}
+  #   container_name: readarr_ebooks
+  #   # network_mode: "service:transmission_openvpn"
+  #   networks:
+  #     - transmission_network
+  #   # Ports go through transmission vpn container
+  #   ports:
+  #     - 8887:8787
+  #   depends_on:
+  #     - transmission_openvpn
+  #     - prowlarr
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=${TZ}
+  #   volumes:
+  #     - /etc/localtime:/etc/localtime:ro
+  #     - ${READARR_PATH}/ebooks:/config
+  #     - ${EBOOKS_PATH}:/ebooks
+  #     - ${DOWNLOADS_PATH}:/downloads
+  #   restart: unless-stopped
