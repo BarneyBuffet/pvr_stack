@@ -15,14 +15,15 @@ services:
     image: haugene/transmission-openvpn:${TRANSMISSION_VERSION:-latest}
     container_name: transmission_openvpn
     restart: unless-stopped
+    devices:
+      - /dev/net/tun:/dev/net/tun
     cap_add:
       - NET_ADMIN
     ports:
-      - 9091:9091
+      - '9091:9091'
     volumes:
-      - "${DOWNLOADS_PATH:-~/Downloads}:/data/downloads:z"
-      - "${DOWNLOADS_INCOMPLETE_PATH:-~/Downloads_Incomplet}:/data/downloads_incomplete:z"
-      - "${TRANSMISSION_PATH:-~/Docker/transmission}:/data/transmission-home:Z"
+      - '${TRANSMISSION_PATH:-~/Docker/transmission}:/config:Z'
+      - '${DOWNLOADS_PATH:-~/Downloads}:/data:Z'
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -36,9 +37,6 @@ services:
       - WEBPROXY_ENABLED=false
       - LOCAL_NETWORK=${TRANSMISSION_LOCAL_NETWORK}
       - TRANSMISSION_SCRAPE_PAUSED_TORRENTS_ENABLED=false
-      - TRANSMISSION_HOME=/data/transmission-home
-      - TRANSMISSION_DOWNLOAD_DIR=/data/downloads
-      - TRANSMISSION_INCOMPLETE_DIR=/data/downloads_incomplete
       - TRANSMISSION_RPC_AUTHENTICATION_REQUIRED=true
       - TRANSMISSION_RPC_USERNAME=${TRANSMISSION_RPC_USERNAME}
       - TRANSMISSION_RPC_PASSWORD=${TRANSMISSION_RPC_PASSWORD}
@@ -54,5 +52,9 @@ services:
       - TRANSMISSION_PEER_PORT=47444
       - DNS=9.9.9.9,149.112.112.112
       - DISABLE_PORT_UPDATER=true
+    logging:
+      driver: json-file
+      options:
+          max-size: 10m
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
