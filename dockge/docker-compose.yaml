@@ -6,8 +6,8 @@
 ---
 networks:
   default:
-    name: transmission_network
-    external: true
+    name: dockge_network
+    driver: bridge
 
 services:
   dockge:
