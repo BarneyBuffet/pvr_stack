@@ -1,0 +1,28 @@
+## # HEIMDALL DASHBOARD
+##
+## An Application dashboard and launcher
+## https://github.com/linuxserver/Heimdall
+## https://github.com/linuxserver/docker-heimdall
+---
+networks:
+  default:
+    name: transmission_network
+    external: true
+
+services:
+  heimdall:
+    image: lscr.io/linuxserver/heimdall:${HEIMDALL_VERSION:-latest}
+    container_name: heimdall
+    # depends_on:
+    #   - transmission_network:transmission_openvpn
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${HEIMDALL_PATH:-/opt/heimdall}:/config
+    ports:
+      - 8081:80
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
