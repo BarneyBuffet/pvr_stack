@@ -59,9 +59,8 @@ services:
       - '8686:8686' # Lidarr
       - '6767:6767' # Bazarr
       - '5055:5055' # Overseerr
-      # - '13378:80' # Audiobookshelf
-      - '8787:8787' # Readarr eBooks
-      - "8887:8887" # Readarr Audiobooks
+      - '8787:8787' # Readarr | eBooks
+      - "8887:8887" # Readarr | Audiobooks
     volumes:
       - '${TRANSMISSION_PATH:-~/Docker/transmission}:/config:Z'
       - '${DOWNLOADS_PATH:-~/Downloads}:/data:Z'
@@ -308,7 +307,7 @@ services:
     container_name: readarr_audiobooks
     network_mode: "service:transmission"
     ## Ports go through transmission vpn container
-    ## Port updated in ./pvr/readarr/audiobooks/config.xml to allow for two
+    ## Port updated in ${READARR_PATH}/audiobooks/config.xml to allow for two
     ## readarr instances (audio and ebooks)
     # ports:
     #   - 8887:8887
@@ -341,7 +340,7 @@ services:
     network_mode: "service:transmission"
     # Ports go through transmission vpn container
     # ports:
-    #   - 8887:8787
+    #   - 8787:8787
     depends_on:
       - transmission
       - prowlarr
