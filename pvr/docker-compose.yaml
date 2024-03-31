@@ -138,8 +138,8 @@ services:
     # ports:
     #  - '8088:443'
     environment:
-      - PUID=1000
-      - PGID=1000
+      - PUID=${PUID}
+      - PGID=${PGID}
       - TZ=${TZ}
     volumes:
       - /etc/localtime:/etc/localtime:ro
