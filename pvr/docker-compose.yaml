@@ -68,6 +68,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
+      - UMASK=${UMASK}
       - CREATE_TUN_DEVICE=true
       - OPENVPN_PROVIDER=${OPENVPN_PROVIDER}
       - OPENVPN_CONFIG=${OPENVPN_CONFIG}
@@ -118,6 +119,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
+      - UMASK=${UMASK}
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${CUSTOM_SCRIPTS_PATH}:/custom_scripts:z
@@ -141,6 +143,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
+      - UMASK=${UMASK}
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${HEIMDALL_PATH}:/config
@@ -171,6 +174,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
+      - UMASK=${UMASK}
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${CUSTOM_SCRIPTS_PATH}:/custom_scripts:z
@@ -201,6 +205,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
+      - UMASK=${UMASK}
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${CUSTOM_SCRIPTS_PATH}:/custom_scripts:z
@@ -230,6 +235,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
+      - UMASK=${UMASK}
       - DOCKER_MODS=linuxserver/mods:lidarr-flac2mp3 #optional
     volumes:
       - /etc/localtime:/etc/localtime:ro
@@ -262,6 +268,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
+      - UMASK=${UMASK}
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${BAZARR_PATH}:/config:Z
@@ -291,6 +298,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
+      - UMASK=${UMASK}
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${OVERSEER_PATH}:/config:Z
@@ -322,6 +330,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
+      - UMASK=${UMASK}
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${AUDIOBOOKS_PATH}:/audiobooks
@@ -353,6 +362,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
+      - UMASK=${UMASK}
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${CUSTOM_SCRIPTS_PATH}:/custom_scripts:z
