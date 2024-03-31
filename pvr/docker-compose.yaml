@@ -120,6 +120,7 @@ services:
       - TZ=${TZ}
     volumes:
       - /etc/localtime:/etc/localtime:ro
+      - ${CUSTOM_SCRIPTS_PATH}:/custom_scripts:z
       - ${PROWLARR_PATH}/:/config:z
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
@@ -172,9 +173,10 @@ services:
       - TZ=${TZ}
     volumes:
       - /etc/localtime:/etc/localtime:ro
+      - ${CUSTOM_SCRIPTS_PATH}:/custom_scripts:z
+      - ${DOWNLOADS_PATH}:/downloads:z
       - ${SONARR_PATH}:/config:z
       - ${TV_SHOWS_PATH}:/tv:z
-      - ${DOWNLOADS_PATH}:/downloads:z
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
   
@@ -201,9 +203,10 @@ services:
       - TZ=${TZ}
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${RADARR_PATH}:/config:z
-      - ${MOVIES_PATH}:/movies:z
+      - ${CUSTOM_SCRIPTS_PATH}:/custom_scripts:z
       - ${DOWNLOADS_PATH}:/downloads:z
+      - ${MOVIES_PATH}:/movies:z
+      - ${RADARR_PATH}:/config:z
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
   
@@ -230,9 +233,10 @@ services:
       - DOCKER_MODS=linuxserver/mods:lidarr-flac2mp3 #optional
     volumes:
       - /etc/localtime:/etc/localtime:ro
+      - ${CUSTOM_SCRIPTS_PATH}:/custom_scripts:z
+      - ${DOWNLOADS_PATH}:/downloads:z
       - ${LIDARR_PATH}:/config:z
       - ${MUSIC_PATH}:/music:z
-      - ${DOWNLOADS_PATH}:/downloads:z
     # Ports go through transmission vpn container
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
@@ -320,9 +324,10 @@ services:
       - TZ=${TZ}
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${READARR_PATH}/audiobooks:/config
       - ${AUDIOBOOKS_PATH}:/audiobooks
+      - ${CUSTOM_SCRIPTS_PATH}:/custom_scripts:z
       - ${DOWNLOADS_PATH}:/downloads
+      - ${READARR_PATH}/audiobooks:/config
     restart: unless-stopped
 
   ## ## READER - EBOOKS
@@ -350,7 +355,8 @@ services:
       - TZ=${TZ}
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${READARR_PATH}/ebooks:/config
-      - ${EBOOKS_PATH}:/ebooks
+      - ${CUSTOM_SCRIPTS_PATH}:/custom_scripts:z
       - ${DOWNLOADS_PATH}:/downloads
+      - ${EBOOKS_PATH}:/ebooks
+      - ${READARR_PATH}/ebooks:/config
     restart: unless-stopped
