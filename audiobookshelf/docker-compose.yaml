@@ -1,0 +1,28 @@
+### AUDIOBOOKSHELF
+###
+### Audiobookshelf is an open-source self-hosted media server for your 
+### audiobooks and podcasts.
+### https://www.audiobookshelf.org/
+---
+networks:
+  default:
+    name: pvr_network
+    driver: bridge
+  transmission_network:
+    external: true
+
+services:
+  audiobookshelf:
+    image: ghcr.io/advplyr/audiobookshelf:${AUDIOBOOKSHELF_VERSION:-latest}
+    ports:
+      - 13378:80
+    networks:
+      - default
+      - transmission_network
+    volumes:
+      - ${AUDIOBOOKS_PATH:?AUDIOBOOKS_PATH variable missing}:/audiobooks
+      - ${PODCASTS_PATH:?PODCASTS_PATH variable missing}:/podcasts
+      - ${AUDIOBOOKSHELF_PATH:?AUDIOBOOKSHELF_PATH variable missing}/config:/config
+      - ${AUDIOBOOKSHELF_PATH:?AUDIOBOOKSHELF_PATH variable missing}/metadata:/metadata
+    environment:
+      - TZ=${TZ}
