@@ -61,6 +61,7 @@ services:
       - '5055:5055' # Overseerr
       - '8787:8787' # Readarr | eBooks
       - "8887:8887" # Readarr | Audiobooks
+      - "13378:13378" # Audiobookshelf
     volumes:
       - '${TRANSMISSION_PATH:-~/Docker/transmission}:/config:Z'
       - '${DOWNLOADS_PATH:-~/Downloads}:/data:Z'
@@ -236,7 +237,7 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
       - UMASK=${UMASK}
-      - DOCKER_MODS=linuxserver/mods:lidarr-flac2mp3 #optional
+      # - DOCKER_MODS=linuxserver/mods:lidarr-flac2mp3 #optional
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${CUSTOM_SCRIPTS_PATH}:/custom_scripts:z
@@ -370,3 +371,28 @@ services:
       - ${EBOOKS_PATH}:/ebooks
       - ${READARR_PATH}/ebooks:/config
     restart: unless-stopped
+
+### AUDIOBOOKSHELF
+###
+### Audiobookshelf is an open-source self-hosted media server for your 
+### audiobooks and podcasts.
+### https://www.audiobookshelf.org/
+  audiobookshelf:
+    image: ghcr.io/advplyr/audiobookshelf:${AUDIOBOOKSHELF_VERSION:-latest}
+    container_name: audiobookshelf
+    restart: unless-stopped
+    depends_on:
+      - transmission
+    network_mode: "service:transmission"
+    # ports:
+    #   - 13378:80
+    volumes:
+      - ${AUDIOBOOKS_PATH:?AUDIOBOOKS_PATH variable missing}:/audiobooks
+      - ${PODCASTS_PATH:?PODCASTS_PATH variable missing}:/podcasts
+      - ${AUDIOBOOKSHELF_PATH:?AUDIOBOOKSHELF_PATH variable missing}/config:/config
+      - ${AUDIOBOOKSHELF_PATH:?AUDIOBOOKSHELF_PATH variable missing}/metadata:/metadata
+    environment:
+      - TZ=${TZ}
+      - PORT=13378
+    labels:
+      - 'com.centurylinklabs.watchtower.enable=true'
