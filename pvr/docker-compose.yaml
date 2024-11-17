@@ -15,10 +15,10 @@
 ##! * Overseer: For requesting and adding movies and tv shows
 ##! * Readarr: For managing audiobooks and ebooks
 ---
-networks:
-  default:
-    name: transmission_network
-    driver: bridge
+# networks:
+#   default:
+#     name: transmission_network
+#     driver: bridge
 
 services:
   ## ## CLOUDFLARE TUNNEL
@@ -49,18 +49,21 @@ services:
     devices:
       - /dev/net/tun:/dev/net/tun
     cap_add:
-      - NET_ADMIN
+      - NET_ADMIN     # Documented requirements
+      - MKNOD         # Allows creation of tun/tap in /dev/net/tun
+      - NET_RAW       # for ping in healthcheck
     ports:
-      - '9091:9091' # Transmission
-      - '9696:9696' # Prowlarr
-      - '8088:80' # Heimdall
-      - '8989:8989' # Sonarr
-      - '7878:7878' # Radarr
-      - '8686:8686' # Lidarr
-      - '6767:6767' # Bazarr
-      - '5055:5055' # Overseerr
-      - '8787:8787' # Readarr | eBooks
-      - "8887:8887" # Readarr | Audiobooks
+      - '9091:9091'   # Transmission
+      - '9696:9696'   # Prowlarr
+      - '8088:80'     # Heimdall
+      - '8989:8989'   # Sonarr
+      - '7878:7878'   # Radarr
+      - '8686:8686'   # Lidarr
+      - '6767:6767'   # Bazarr
+      - '5000:5000'   # Syncify
+      - '5055:5055'   # Overseerr
+      - '8787:8787'   # Readarr | eBooks
+      - "8887:8887"   # Readarr | Audiobooks
       - "13378:13378" # Audiobookshelf
     volumes:
       - '${TRANSMISSION_PATH:-~/Docker/transmission}:/config:Z'
@@ -98,6 +101,12 @@ services:
       driver: json-file
       options:
           max-size: 10m
+    healthcheck:
+      test: ["CMD", "curl", "--connect-timeout", "15", "-o", "/dev/null", "--silent", "--show-error", "--fail", "http://localhost:9091" ]
+      interval: 60s
+      timeout: 30s
+      retries: 3
+      start_period: 90s
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
   
@@ -125,6 +134,12 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${CUSTOM_SCRIPTS_PATH}:/custom_scripts:z
       - ${PROWLARR_PATH}/:/config:z
+    healthcheck:
+      test: ["CMD", "curl", "--connect-timeout", "15", "-o", "/dev/null", "--silent", "--show-error", "--fail", "http://localhost:9696" ]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 90s
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
 
@@ -182,6 +197,12 @@ services:
       - ${DOWNLOADS_PATH}:/downloads:z
       - ${SONARR_PATH}:/config:z
       - ${TV_SHOWS_PATH}:/tv:z
+    healthcheck:
+      test: ["CMD", "curl", "--connect-timeout", "15", "-o", "/dev/null", "--silent", "--show-error", "--fail", "http://localhost:8989" ]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 90s
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
   
@@ -213,6 +234,13 @@ services:
       - ${DOWNLOADS_PATH}:/downloads:z
       - ${MOVIES_PATH}:/movies:z
       - ${RADARR_PATH}:/config:z
+    healthcheck:
+      test: ["CMD", "curl", "--connect-timeout", "15", "-o", "/dev/null", "--silent", "--show-error", "--fail", "http://localhost:7878" ]
+      # test: ["CMD", "pgrep", "-f", "Radarr"] # Check if Radarr process is running
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 90s
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
   
@@ -244,7 +272,12 @@ services:
       - ${DOWNLOADS_PATH}:/downloads:z
       - ${LIDARR_PATH}:/config:z
       - ${MUSIC_PATH}:/music:z
-    # Ports go through transmission vpn container
+    healthcheck:
+      test: ["CMD", "curl", "--connect-timeout", "15", "-o", "/dev/null", "--silent", "--show-error", "--fail", "http://localhost:8686" ]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 90s
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
   
@@ -275,6 +308,12 @@ services:
       - ${BAZARR_PATH}:/config:Z
       - ${MOVIES_PATH}:/movies:z
       - ${TV_SHOWS_PATH}:/tv:z
+    healthcheck:
+      test: ["CMD", "curl", "--connect-timeout", "15", "-o", "/dev/null", "--silent", "--show-error", "--fail", "http://localhost:6767" ]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 90s
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
 
@@ -303,6 +342,12 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${OVERSEER_PATH}:/config:Z
+    healthcheck:
+      test: ["CMD", "curl", "--connect-timeout", "15", "-o", "/dev/null", "--silent", "--show-error", "--fail", "http://localhost:5055" ]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 90s
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
   
@@ -318,6 +363,7 @@ services:
     ## https://github.com/linuxserver/docker-readarr/releases
     image: lscr.io/linuxserver/readarr:${READARR_VERSION:-develop}
     container_name: readarr_audiobooks
+    restart: unless-stopped
     network_mode: "service:transmission"
     ## Ports go through transmission vpn container
     ## Port updated in ${READARR_PATH}/audiobooks/config.xml to allow for two
@@ -338,7 +384,14 @@ services:
       - ${CUSTOM_SCRIPTS_PATH}:/custom_scripts:z
       - ${DOWNLOADS_PATH}:/downloads
       - ${READARR_PATH}/audiobooks:/config
-    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "--connect-timeout", "15", "-o", "/dev/null", "--silent", "--show-error", "--fail", "http://localhost:8887" ]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 90s
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
 
   ## ## READER - EBOOKS
   ##
@@ -352,6 +405,7 @@ services:
     ## https://github.com/linuxserver/docker-readarr/releases
     image: lscr.io/linuxserver/readarr:${READARR_VERSION:-develop}
     container_name: readarr_ebooks
+    restart: unless-stopped
     network_mode: "service:transmission"
     # Ports go through transmission vpn container
     # ports:
@@ -370,13 +424,20 @@ services:
       - ${DOWNLOADS_PATH}:/downloads
       - ${EBOOKS_PATH}:/ebooks
       - ${READARR_PATH}/ebooks:/config
-    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "--connect-timeout", "15", "-o", "/dev/null", "--silent", "--show-error", "--fail", "http://localhost:8787" ]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 90s
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
 
-### AUDIOBOOKSHELF
-###
-### Audiobookshelf is an open-source self-hosted media server for your 
-### audiobooks and podcasts.
-### https://www.audiobookshelf.org/
+  ### AUDIOBOOKSHELF
+  ###
+  ### Audiobookshelf is an open-source self-hosted media server for your 
+  ### audiobooks and podcasts.
+  ### https://www.audiobookshelf.org/
   audiobookshelf:
     image: ghcr.io/advplyr/audiobookshelf:${AUDIOBOOKSHELF_VERSION:-latest}
     container_name: audiobookshelf
@@ -394,5 +455,29 @@ services:
     environment:
       - TZ=${TZ}
       - PORT=13378
+    healthcheck:
+      test: ["CMD", "curl", "--connect-timeout", "15", "-o", "/dev/null", "--silent", "--show-error", "--fail", "http://localhost:13378" ]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 90s
+    labels:
+      - 'com.centurylinklabs.watchtower.enable=true'
+  
+  syncify:
+    image: thewicklowwolf/syncify:${SYNCIFY_VERSION:-latest}
+    container_name: syncify
+    restart: unless-stopped
+    depends_on:
+      - transmission
+    network_mode: "service:transmission"
+    # ports:
+    #   - 5000:5000
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${SYNCIFY_PATH:?SYNCIFY_PATH variable missing}:/syncify/config:z
+      - ${MUSIC_PATH:?MUSIC_PATH variable missing}/syncify:/music:z
+    environment:
+      - thread_limit=1
     labels:
       - 'com.centurylinklabs.watchtower.enable=true'
