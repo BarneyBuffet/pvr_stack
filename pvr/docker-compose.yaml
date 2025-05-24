@@ -53,21 +53,22 @@ services:
       - MKNOD         # Allows creation of tun/tap in /dev/net/tun
       - NET_RAW       # for ping in healthcheck
     ports:
-      - '9091:9091'   # Transmission
-      - '9696:9696'   # Prowlarr
-      - '8088:80'     # Heimdall
-      - '8989:8989'   # Sonarr
-      - '7878:7878'   # Radarr
-      - '8686:8686'   # Lidarr
-      - '6767:6767'   # Bazarr
       - '5000:5000'   # Syncify
       - '5055:5055'   # Overseerr
+      - '6767:6767'   # Bazarr
+      - '7878:7878'   # Radarr
+      - '8088:80'     # Heimdall
+      - '8686:8686'   # Lidarr
       - '8787:8787'   # Readarr | eBooks
-      - "8887:8887"   # Readarr | Audiobooks
+      - '8989:8989'   # Sonarr
+      - '9091:9091'   # Transmission
+      - '9696:9696'   # Prowlarr
       - "13378:13378" # Audiobookshelf
+      - "8887:8887"   # Readarr | Audiobooks
+      - "9705:9705"   # Huntarr
     volumes:
-      - '${TRANSMISSION_PATH:-~/Docker/transmission}:/config:Z'
-      - '${DOWNLOADS_PATH:-~/Downloads}:/data:Z'
+      - '${TRANSMISSION_PATH:-~/Docker/transmission}:/config:z'
+      - '${DOWNLOADS_PATH:-~/Downloads}:/data:z'
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -162,7 +163,7 @@ services:
       - UMASK=${UMASK}
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${HEIMDALL_PATH}:/config
+      - ${HEIMDALL_PATH}:/config:z
     # ports: # Not needed because we are going to use the tunnel
     #   - 11443:443
     restart: unless-stopped
@@ -305,7 +306,7 @@ services:
       - UMASK=${UMASK}
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${BAZARR_PATH}:/config:Z
+      - ${BAZARR_PATH}:/config:z
       - ${MOVIES_PATH}:/movies:z
       - ${TV_SHOWS_PATH}:/tv:z
     healthcheck:
@@ -341,7 +342,7 @@ services:
       - UMASK=${UMASK}
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${OVERSEER_PATH}:/config:Z
+      - ${OVERSEER_PATH}:/config:z
     healthcheck:
       test: ["CMD", "curl", "--connect-timeout", "15", "-o", "/dev/null", "--silent", "--show-error", "--fail", "http://localhost:5055" ]
       interval: 60s
@@ -380,10 +381,10 @@ services:
       - UMASK=${UMASK}
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${AUDIOBOOKS_PATH}:/audiobooks
+      - ${AUDIOBOOKS_PATH}:/audiobooks:z
       - ${CUSTOM_SCRIPTS_PATH}:/custom_scripts:z
-      - ${DOWNLOADS_PATH}:/downloads
-      - ${READARR_PATH}/audiobooks:/config
+      - ${DOWNLOADS_PATH}:/downloads:z
+      - ${READARR_PATH}/audiobooks:/config:z
     healthcheck:
       test: ["CMD", "curl", "--connect-timeout", "15", "-o", "/dev/null", "--silent", "--show-error", "--fail", "http://localhost:8887" ]
       interval: 60s
@@ -421,9 +422,9 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ${CUSTOM_SCRIPTS_PATH}:/custom_scripts:z
-      - ${DOWNLOADS_PATH}:/downloads
-      - ${EBOOKS_PATH}:/ebooks
-      - ${READARR_PATH}/ebooks:/config
+      - ${DOWNLOADS_PATH}:/downloads:z
+      - ${EBOOKS_PATH}:/ebooks:z
+      - ${READARR_PATH}/ebooks:/config:z
     healthcheck:
       test: ["CMD", "curl", "--connect-timeout", "15", "-o", "/dev/null", "--silent", "--show-error", "--fail", "http://localhost:8787" ]
       interval: 60s
@@ -448,10 +449,10 @@ services:
     # ports:
     #   - 13378:80
     volumes:
-      - ${AUDIOBOOKS_PATH:?AUDIOBOOKS_PATH variable missing}:/audiobooks
-      - ${PODCASTS_PATH:?PODCASTS_PATH variable missing}:/podcasts
-      - ${AUDIOBOOKSHELF_PATH:?AUDIOBOOKSHELF_PATH variable missing}/config:/config
-      - ${AUDIOBOOKSHELF_PATH:?AUDIOBOOKSHELF_PATH variable missing}/metadata:/metadata
+      - ${AUDIOBOOKS_PATH:?AUDIOBOOKS_PATH variable missing}:/audiobooks:z
+      - ${PODCASTS_PATH:?PODCASTS_PATH variable missing}:/podcasts:z
+      - ${AUDIOBOOKSHELF_PATH:?AUDIOBOOKSHELF_PATH variable missing}/config:/config:z
+      - ${AUDIOBOOKSHELF_PATH:?AUDIOBOOKSHELF_PATH variable missing}/metadata:/metadata:z
     environment:
       - TZ=${TZ}
       - PORT=13378
@@ -464,20 +465,185 @@ services:
     labels:
       - 'com.centurylinklabs.watchtower.enable=true'
   
-  syncify:
-    image: thewicklowwolf/syncify:${SYNCIFY_VERSION:-latest}
-    container_name: syncify
+  huntarr:
+    image: ghcr.io/plexguide/huntarr:${HUNTARR_VERSION:-latest}
+    container_name: huntarr
     restart: unless-stopped
+    network_mode: "service:transmission"
     depends_on:
       - transmission
-    network_mode: "service:transmission"
     # ports:
-    #   - 5000:5000
+    #   - "9705:9705"
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ${SYNCIFY_PATH:?SYNCIFY_PATH variable missing}:/syncify/config:z
-      - ${MUSIC_PATH:?MUSIC_PATH variable missing}/syncify:/music:z
+      - ${HUNTARR_PATH:?HUNTARR_PATH variable missing}:/config:z
     environment:
-      - thread_limit=1
+      - TZ=${TZ}
+    healthcheck:
+      test: ["CMD", "curl", "--connect-timeout", "15", "-o", "/dev/null", "--silent", "--show-error", "--fail", "http://localhost:9705" ]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 90s
     labels:
       - 'com.centurylinklabs.watchtower.enable=true'
+
+  # cleanuperr:
+  #   image: ghcr.io/flmorg/cleanuperr:${HUNTARR_VERSION:-latest}
+  #   container_name: cleanuperr
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - transmission
+  #   # ports:
+  #   #   - "9705:9705"
+  #   # volumes:
+  #   #   # - /your-path/huntarr:/config
+  #   #   - ${CLEANARR_PATH:?CLEANARR_PATH variable missing}:/config
+  #   environment:
+  #     - TZ=${TZ}
+
+  cleanuperr:
+    image: ghcr.io/flmorg/cleanuperr:${CLEANUPERR_VERSION:-latest}
+    restart: unless-stopped
+    # volumes:
+    #   # if you want persistent logs
+    #   - ./cleanuperr/logs:/var/logs
+    #   # if you want to ignore certain downloads from being processed
+    #   - ./cleanuperr/ignored.txt:/ignored.txt
+    #   # if you're using cross-seed and the hardlinks functionality
+    #   - ./downloads:/downloads
+    environment:
+      - TZ=${TZ}
+      - DRY_RUN=false
+      - HTTP_MAX_RETRIES=0
+      - HTTP_TIMEOUT=100
+      - HTTP_VALIDATE_CERT=Enabled
+      
+      - LOGGING__LOGLEVEL=Information
+      - LOGGING__FILE__ENABLED=false
+      - LOGGING__FILE__PATH=/var/logs/
+      - LOGGING__ENHANCED=true
+      
+      - SEARCH_ENABLED=true
+      - SEARCH_DELAY=30
+      
+      - TRIGGERS__QUEUECLEANER=0 0/5 * * * ?
+      - QUEUECLEANER__ENABLED=true
+      - QUEUECLEANER__IGNORED_DOWNLOADS_PATH=/ignored.txt
+      - QUEUECLEANER__RUNSEQUENTIALLY=true
+      
+      - QUEUECLEANER__IMPORT_FAILED_MAX_STRIKES=5
+      - QUEUECLEANER__IMPORT_FAILED_IGNORE_PRIVATE=false
+      - QUEUECLEANER__IMPORT_FAILED_DELETE_PRIVATE=false
+      - QUEUECLEANER__IMPORT_FAILED_IGNORE_PATTERNS__0=title mismatch
+      - QUEUECLEANER__IMPORT_FAILED_IGNORE_PATTERNS__1=manual import required
+      
+      - QUEUECLEANER__STALLED_MAX_STRIKES=5
+      - QUEUECLEANER__STALLED_RESET_STRIKES_ON_PROGRESS=true
+      - QUEUECLEANER__STALLED_IGNORE_PRIVATE=false
+      - QUEUECLEANER__STALLED_DELETE_PRIVATE=false
+      - QUEUECLEANER__DOWNLOADING_METADATA_MAX_STRIKES=5
+      
+      - QUEUECLEANER__SLOW_MAX_STRIKES=5
+      - QUEUECLEANER__SLOW_RESET_STRIKES_ON_PROGRESS=true
+      - QUEUECLEANER__SLOW_IGNORE_PRIVATE=false
+      - QUEUECLEANER__SLOW_DELETE_PRIVATE=false
+      - QUEUECLEANER__SLOW_MIN_SPEED=1MB
+      - QUEUECLEANER__SLOW_MAX_TIME=20
+      - QUEUECLEANER__SLOW_IGNORE_ABOVE_SIZE=60GB
+      
+      - TRIGGERS__CONTENTBLOCKER=0 0/5 * * * ?
+      - CONTENTBLOCKER__ENABLED=true
+      - CONTENTBLOCKER__IGNORED_DOWNLOADS_PATH=/ignored.txt
+      - CONTENTBLOCKER__IGNORE_PRIVATE=false
+      - CONTENTBLOCKER__DELETE_PRIVATE=false
+      
+      - TRIGGERS__DOWNLOADCLEANER=0 0 * * * ?
+      - DOWNLOADCLEANER__ENABLED=true
+      - DOWNLOADCLEANER__IGNORED_DOWNLOADS_PATH=/ignored.txt
+      - DOWNLOADCLEANER__DELETE_PRIVATE=false
+      
+      - DOWNLOADCLEANER__CATEGORIES__0__NAME=tv-sonarr
+      - DOWNLOADCLEANER__CATEGORIES__0__MAX_RATIO=1
+      - DOWNLOADCLEANER__CATEGORIES__0__MIN_SEED_TIME=0
+      - DOWNLOADCLEANER__CATEGORIES__0__MAX_SEED_TIME=240
+      - DOWNLOADCLEANER__CATEGORIES__1__NAME=radarr
+      - DOWNLOADCLEANER__CATEGORIES__1__MAX_RATIO=1
+      - DOWNLOADCLEANER__CATEGORIES__1__MIN_SEED_TIME=0
+      - DOWNLOADCLEANER__CATEGORIES__1__MAX_SEED_TIME=240
+      - DOWNLOADCLEANER__CATEGORIES__2__NAME=cleanuperr-unlinked
+      - DOWNLOADCLEANER__CATEGORIES__2__MAX_RATIO=1
+      - DOWNLOADCLEANER__CATEGORIES__2__MIN_SEED_TIME=0
+      - DOWNLOADCLEANER__CATEGORIES__2__MAX_SEED_TIME=240
+      
+      - DOWNLOADCLEANER__UNLINKED_TARGET_CATEGORY=cleanuperr-unlinked
+      - DOWNLOADCLEANER__UNLINKED_USE_TAG=false
+      - DOWNLOADCLEANER__UNLINKED_IGNORED_ROOT_DIR=/downloads
+      - DOWNLOADCLEANER__UNLINKED_CATEGORIES__0=tv-sonarr
+      - DOWNLOADCLEANER__UNLINKED_CATEGORIES__1=radarr
+      
+      - DOWNLOAD_CLIENT=transmission
+      # OR
+      # - DOWNLOAD_CLIENT=disabled
+      # OR          
+      # - DOWNLOAD_CLIENT=qBittorrent
+      # - QBITTORRENT__URL=http://localhost:8080
+      # - QBITTORRENT__URL_BASE=myCustomPath
+      # - QBITTORRENT__USERNAME=user
+      # - QBITTORRENT__PASSWORD=pass
+      # OR
+      # - DOWNLOAD_CLIENT=deluge
+      # - DELUGE__URL=http://localhost:8112
+      # - DELUGE__URL_BASE=myCustomPath
+      # - DELUGE__PASSWORD=pass
+      # OR
+      # - DOWNLOAD_CLIENT=transmission
+      # - TRANSMISSION__URL=http://localhost:9091
+      # - TRANSMISSION__URL_BASE=myCustomPath
+      # - TRANSMISSION__USERNAME=user
+      # - TRANSMISSION__PASSWORD=pass
+      
+      - SONARR__ENABLED=true
+      - SONARR__IMPORT_FAILED_MAX_STRIKES=-1
+      - SONARR__SEARCHTYPE=Episode
+      - SONARR__BLOCK__TYPE=blacklist
+      # - SONARR__BLOCK__PATH=https://example.com/path/to/file.txt
+      - SONARR__INSTANCES__0__URL=http://localhost:8989
+      - SONARR__INSTANCES__0__APIKEY=${SONARR_APIKEY1}
+      # - SONARR__INSTANCES__1__URL=http://localhost:8990
+      # - SONARR__INSTANCES__1__APIKEY=sonarrSecret2
+      
+      - RADARR__ENABLED=true
+      - RADARR__IMPORT_FAILED_MAX_STRIKES=-1
+      - RADARR__BLOCK__TYPE=blacklist
+      # - RADARR__BLOCK__PATH=https://example.com/path/to/file.txt
+      - RADARR__INSTANCES__0__URL=http://localhost:7878
+      - RADARR__INSTANCES__0__APIKEY=${RADARR_APIKEY1}
+      # - RADARR__INSTANCES__1__URL=http://localhost:7879
+      # - RADARR__INSTANCES__1__APIKEY=radarrSecret2
+      
+      - LIDARR__ENABLED=true
+      - LIDARR__IMPORT_FAILED_MAX_STRIKES=-1
+      - LIDARR__BLOCK__TYPE=blacklist
+      # - LIDARR__BLOCK__PATH=https://example.com/path/to/file.txt
+      - LIDARR__INSTANCES__0__URL=http://localhost:8686
+      - LIDARR__INSTANCES__0__APIKEY=#{LIDARR_APIKEY1}
+      # - LIDARR__INSTANCES__1__URL=http://localhost:8687
+      # - LIDARR__INSTANCES__1__APIKEY=lidarrSecret2
+      
+      # - NOTIFIARR__ON_IMPORT_FAILED_STRIKE=true
+      # - NOTIFIARR__ON_STALLED_STRIKE=true
+      # - NOTIFIARR__ON_SLOW_STRIKE=true
+      # - NOTIFIARR__ON_QUEUE_ITEM_DELETED=true
+      # - NOTIFIARR__ON_DOWNLOAD_CLEANED=true
+      # - NOTIFIARR__ON_CATEGORY_CHANGED=true
+      # - NOTIFIARR__API_KEY=notifiarrSecret
+      # - NOTIFIARR__CHANNEL_ID=discordChannelId
+      
+      # - APPRISE__ON_IMPORT_FAILED_STRIKE=true
+      # - APPRISE__ON_STALLED_STRIKE=true
+      # - APPRISE__ON_SLOW_STRIKE=true
+      # - APPRISE__ON_QUEUE_ITEM_DELETED=true
+      # - APPRISE__ON_DOWNLOAD_CLEANED=true
+      # - APPRISE__ON_CATEGORY_CHANGED=true
+      # - APPRISE__URL=http://apprise:8000
+      # - APPRISE__KEY=myConfigKey
